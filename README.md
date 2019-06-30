@@ -45,7 +45,7 @@ A command to show each env status, whether it is using for testing or available 
 
 `npx env-status staging` will show staging and production (if defined) status
 
-![npx env-status](https://raw.githubusercontent.com/webyom/env-status/master/img/result-2.png)
+![npx env-status staging](https://raw.githubusercontent.com/webyom/env-status/master/img/result-2.png)
 
 ## Note
 
