@@ -1,0 +1,35 @@
+{
+  "name": "env-status",
+  "version": "0.0.1",
+  "description": "Show each env status by one command.",
+  "keywords": [
+    "env",
+    "status"
+  ],
+  "homepage": "https://github.com/webyom/env-status",
+  "author": {
+    "name": "Gary Wang",
+    "email": "webyom@gmail.com",
+    "url": "http://webyom.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webyom/env-status.git"
+  },
+  "bugs": {
+    "url": "https://github.com/webyom/env-status/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/webyom/env-status/blob/master/LICENSE-MIT"
+    }
+  ],
+  "bin": "index.js",
+  "scripts": {},
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "fetch": "^1.1.0",
+    "table-parser": "^1.0.1"
+  }
+}
