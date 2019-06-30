@@ -5,7 +5,7 @@ A command to show each env status, whether it is using for testing or available 
 
 - Install
 
-  `yarn add -dev env-status`
+  `yarn add --dev env-status`
 
 - Create `.envstatus.js` file in your project root as below.
 
