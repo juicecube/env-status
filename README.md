@@ -26,6 +26,7 @@ A command to show each env status, whether it is using for testing or available 
   ```json
   {
     "version": "1.1.0",
+    "commit": "2cff5448220af07d4e25762b3210712427ba5f8e",
     "author": "webyom <webyom@gmail.com>",
     "date": 1561874837800
   }
