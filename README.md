@@ -32,6 +32,7 @@ A command to show each env status, whether it is using for testing or available 
   ```
 
   - `version` is the version defined in package.json
+  - `commit` is the the HEAD commit hash when you publish your project.
   - `author` is the HEAD commit author when you publish your project.
   - `date` is the timestamp when you publish your project.
 

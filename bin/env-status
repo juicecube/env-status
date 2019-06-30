@@ -9,7 +9,7 @@ const fs = require('fs'),
 
 const ERR = {
   URL_FUNCTION_UNDEFINED: 'URL_FUNCTION_UNDEFINED',
-  CAN_NOT_REACH: 'CAN_NOT_REACH',
+  LOAD_ERROR: 'LOAD_ERROR',
   PARSE_RESPONSE_ERROR: 'PARSE_RESPONSE_ERROR'
 };
 
@@ -46,10 +46,21 @@ Promise.all(envs.map(env => fetchEnvData(env))).then(function (envsData) {
     spinner.clear();
     const prdVersion = envsData[0].env == 'production' ? envsData[0].version : '';
     envsData = envsData.map(data => {
+      let status;
+      if (data.err) {
+        status = chalk.red(data.err);
+      } else if (data.env == 'production') {
+        status = '';
+      } else if (compareVersion(data.version, prdVersion) == 1) {
+        status = chalk.yellow('Using');
+      } else {
+        status = chalk.green('Available');
+      }
       const res = {
         env: data.env,
-        status: data.env == 'production' ? '' : compareVersion(data.version, prdVersion) === 1 ? chalk.red('Using') : chalk.green('Available'),
+        status: status,
         version: data.version,
+        commit: data.commit,
         author: data.author,
         date: data.date && new Date(data.date).toLocaleString(),
       };
@@ -106,8 +117,8 @@ function fetchEnvData(env) {
     const url = config.url(env);
     fetch.fetchUrl(url, function (error, meta, body) {
       let data;
-      if (error) {
-        resolve({err: ERR.CAN_NOT_REACH, env: env});
+      if (error || meta.status != 200) {
+        resolve({err: ERR.LOAD_ERROR, env: env});
         return;
       }
       try {
