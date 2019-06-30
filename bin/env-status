@@ -1,0 +1,122 @@
+#!/usr/bin/env node
+
+const fs = require('fs'),
+  path = require('path'),
+  fetch = require('fetch'),
+  chalk = require('chalk')
+  ora = require('ora'),
+  asTable = require('as-table');
+
+const ERR = {
+  URL_FUNCTION_UNDEFINED: 'URL_FUNCTION_UNDEFINED',
+  CAN_NOT_REACH: 'CAN_NOT_REACH',
+  PARSE_RESPONSE_ERROR: 'PARSE_RESPONSE_ERROR'
+};
+
+const configPath = path.resolve('.envstatus.js');
+
+const spinner = ora('Loading .envstatus.js').start();
+
+if (!fs.existsSync(configPath)) {
+  spinner.fail(`${chalk.yellow('.envstatus.js')} file is missing!`);
+  process.exit();
+}
+
+const config = require(configPath);
+const requestEnv = process.argv[2];
+const envs = (config.envs || []).filter(env => {
+  if (requestEnv) {
+    return typeof env == 'string' && (env == requestEnv || env == 'production');
+  } else {
+    return typeof env == 'string';
+  }
+}).sort((a, b) => getEnvWeight(a) - getEnvWeight(b));
+
+if (requestEnv && envs.length < 2) {
+  if (!envs.length || envs[0] != requestEnv) {
+    spinner.fail(`env ${chalk.yellow(requestEnv)} undefined!`);
+    process.exit();
+  }
+}
+
+spinner.text = 'Loading envs data';
+
+Promise.all(envs.map(env => fetchEnvData(env))).then(function (envsData) {
+  if (envsData.length) {
+    spinner.clear();
+    const prdVersion = envsData[0].env == 'production' ? envsData[0].version : '';
+    envsData = envsData.map(data => {
+      const res = {
+        env: data.env,
+        status: data.env == 'production' ? '' : compareVersion(data.version, prdVersion) === 1 ? chalk.red('Using') : chalk.green('Available'),
+        version: data.version,
+        author: data.author,
+        date: data.date && new Date(data.date).toLocaleString(),
+      };
+      return res;
+    });
+    console.log('');
+    console.log(asTable(envsData));
+    console.log('');
+  } else {
+    spinner.fail('No env defined')
+  }
+})
+.catch(err => {
+  spinner.clear();
+  console.error(err);
+})
+.finally(() => spinner.stop());
+
+function compareVersion(a, b) {
+  const r = /^[vV]?\d+\.\d+\.\d+$/;
+  if (!r.test(a) || !r.test(b)) {
+    return 9;
+  }
+  a = a.replace(/^[vV]/, '').split('.');
+  b = b.replace(/^[vV]/, '').split('.');
+  for (let i = 0, l = a.length; i < l; i++) {
+    const ai = parseInt(a[i]);
+    const bi = parseInt(b[i]);
+    if (ai > bi) {
+      return 1;
+    } else if (ai < bi) {
+      return -1;
+    }
+  };
+  return 0;
+}
+
+function getEnvWeight(env) {
+  if (env == 'production') {
+    return 0;
+  } else if (env == 'staging') {
+    return 1;
+  } else {
+    return 2;
+  }
+}
+
+function fetchEnvData(env) {
+  return new Promise(function (resolve) {
+    if (typeof config.url != 'function') {
+      resolve({err: ERR.URL_FUNCTION_UNDEFINED, env: env});
+      return;
+    }
+    const url = config.url(env);
+    fetch.fetchUrl(url, function (error, meta, body) {
+      let data;
+      if (error) {
+        resolve({err: ERR.CAN_NOT_REACH, env: env});
+        return;
+      }
+      try {
+        data = Object.assign({env: env}, JSON.parse(body.toString()));
+      } catch (err) {
+        resolve({err: ERR.PARSE_RESPONSE_ERROR, env: env});
+        return;
+      }
+      resolve(data);
+    });
+  });
+}

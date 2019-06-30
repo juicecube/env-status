@@ -1,0 +1,6 @@
+/envs/
+/img/
+.editorconfig
+.envstatus.js
+.gitignore
+.npmignore

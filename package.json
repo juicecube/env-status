@@ -1,7 +1,7 @@
 {
   "name": "env-status",
-  "version": "0.0.1",
-  "description": "Show each env status by one command.",
+  "version": "0.1.0",
+  "description": "A command to show each env status, whether it is using for testing or available for using.",
   "keywords": [
     "env",
     "status"
@@ -25,11 +25,14 @@
       "url": "https://github.com/webyom/env-status/blob/master/LICENSE-MIT"
     }
   ],
-  "bin": "index.js",
+  "bin": {
+    "env-status": "./bin/env-status"
+  },
   "scripts": {},
   "dependencies": {
+    "as-table": "^1.0.52",
     "chalk": "^2.4.2",
     "fetch": "^1.1.0",
-    "table-parser": "^1.0.1"
+    "ora": "^3.4.0"
   }
 }
