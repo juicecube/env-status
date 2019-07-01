@@ -22,13 +22,6 @@ if (!fs.existsSync(configPath)) {
   process.exit();
 }
 
-const currentVersion = (function () {
-  try {
-    const pkgInfo = require(path.resolve('package.json'));
-    return pkgInfo.version;
-  } catch (err) {}
-})();
-
 const config = require(configPath);
 const requestEnv = process.argv[2];
 const envs = (config.envs || []).filter(env => {
@@ -45,6 +38,13 @@ if (requestEnv && envs.length < 2) {
     process.exit();
   }
 }
+
+const currentVersion = (function () {
+  try {
+    const pkgInfo = require(path.resolve('package.json'));
+    return pkgInfo.version;
+  } catch (err) {}
+})();
 
 spinner.text = 'Loading envs data';
 
