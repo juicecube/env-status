@@ -22,6 +22,13 @@ if (!fs.existsSync(configPath)) {
   process.exit();
 }
 
+const currentVersion = (function () {
+  try {
+    const pkgInfo = require(path.resolve('package.json'));
+    return pkgInfo.version;
+  } catch (err) {}
+})();
+
 const config = require(configPath);
 const requestEnv = process.argv[2];
 const envs = (config.envs || []).filter(env => {
@@ -52,7 +59,7 @@ Promise.all(envs.map(env => fetchEnvData(env))).then(function (envsData) {
       } else if (data.env == 'production') {
         status = '';
       } else if (compareVersion(data.version, prdVersion) == 1) {
-        status = chalk.yellow('Using');
+        status = chalk.yellow('Using' + (currentVersion == data.version ? ' *' : ''));
       } else {
         status = chalk.green('Available');
       }
