@@ -2,6 +2,7 @@
 
 const fs = require('fs'),
   path = require('path'),
+  moment = require('moment'),
   fetch = require('fetch'),
   chalk = require('chalk')
   ora = require('ora'),
@@ -30,7 +31,7 @@ const envs = (config.envs || []).filter(env => {
   } else {
     return typeof env == 'string';
   }
-}).sort((a, b) => getEnvWeight(a) - getEnvWeight(b));
+});
 
 if (requestEnv && envs.length < 2) {
   if (!envs.length || envs[0] != requestEnv) {
@@ -52,7 +53,9 @@ Promise.all(envs.map(env => fetchEnvData(env))).then(function (envsData) {
   if (envsData.length) {
     spinner.clear();
     const prdVersion = envsData[0].env == 'production' ? envsData[0].version : '';
-    envsData = envsData.map(data => {
+    envsData = envsData.sort((a, b) => {
+      return getEnvWeight(a.env) - getEnvWeight(b.env) + (a.date > b.date ? -1 : a.date < b.date ? 1 : 0);
+    }).map(data => {
       let status;
       if (data.err) {
         status = chalk.red(data.err);
@@ -67,9 +70,11 @@ Promise.all(envs.map(env => fetchEnvData(env))).then(function (envsData) {
         env: data.env,
         status: status,
         version: data.version,
+        branch: data.branch,
         commit: data.commit,
         author: data.author,
-        date: data.date && new Date(data.date).toLocaleString(),
+        date: data.date && moment(data.date).format('MM/DD HH:mm:ss'),
+        since: data.date && moment(data.date).fromNow()
       };
       return res;
     });
@@ -107,11 +112,11 @@ function compareVersion(a, b) {
 
 function getEnvWeight(env) {
   if (env == 'production') {
-    return 0;
+    return 10;
   } else if (env == 'staging') {
-    return 1;
+    return 20;
   } else {
-    return 2;
+    return 30;
   }
 }
 

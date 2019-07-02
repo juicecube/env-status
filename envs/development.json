@@ -1,6 +1,7 @@
 {
-  "version": "1.1.0",
-  "commit": "17f53ca090d44fd89f805425dee8f21a801a967d",
+  "version": "1.0.0",
+  "branch": "develop",
+  "commit": "aa94f5d7582bcb6458854c7925f3edd37b072a92",
   "author": "webyom <webyom@gmail.com>",
-  "date": 1561874837800
+  "date": 1561702037800
 }
