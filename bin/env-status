@@ -52,19 +52,24 @@ spinner.text = 'Loading envs data';
 Promise.all(envs.map(env => fetchEnvData(env))).then(function (envsData) {
   if (envsData.length) {
     spinner.clear();
-    const prdVersion = envsData[0].env == 'production' ? envsData[0].version : '';
     envsData = envsData.sort((a, b) => {
       return getEnvWeight(a.env) - getEnvWeight(b.env) + (a.date > b.date ? -1 : a.date < b.date ? 1 : 0);
-    }).map(data => {
+    });
+    const prdVersion = envsData[0].env == 'production' ? envsData[0].version : '';
+    const stgIndex = prdVersion && envsData.length > 1 ? 1 : 0;
+    const stgVersion = envsData[stgIndex].env == 'staging' ? envsData[stgIndex].version : '';
+    envsData = envsData.map(data => {
       let status;
       if (data.err) {
         status = chalk.red(data.err);
       } else if (data.env == 'production') {
         status = '';
-      } else if (compareVersion(data.version, prdVersion) == 1) {
-        status = chalk.yellow('Using' + (currentVersion == data.version ? ' *' : ''));
-      } else {
+      } else if (compareVersion(data.version, prdVersion) != 1) {
         status = chalk.green('Available');
+      } else if (data.env != 'staging' && compareVersion(data.version, stgVersion) == 0) {
+        status = chalk.green('Available');
+      } else {
+        status = chalk.yellow('Using' + (currentVersion == data.version ? ' *' : ''));
       }
       const res = {
         env: data.env,
