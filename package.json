@@ -25,6 +25,7 @@
       "url": "https://github.com/webyom/env-status/blob/master/LICENSE-MIT"
     }
   ],
+  "main": "index.js",
   "bin": {
     "env-status": "./bin/env-status"
   },

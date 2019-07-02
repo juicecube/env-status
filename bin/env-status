@@ -3,16 +3,10 @@
 const fs = require('fs'),
   path = require('path'),
   moment = require('moment'),
-  fetch = require('fetch'),
   chalk = require('chalk')
   ora = require('ora'),
-  asTable = require('as-table');
-
-const ERR = {
-  URL_FUNCTION_UNDEFINED: 'URL_FUNCTION_UNDEFINED',
-  LOAD_ERROR: 'LOAD_ERROR',
-  PARSE_RESPONSE_ERROR: 'PARSE_RESPONSE_ERROR'
-};
+  asTable = require('as-table')
+  envStatus = require('../index');
 
 const configPath = path.resolve('.envstatus.js');
 
@@ -49,7 +43,7 @@ const currentVersion = (function () {
 
 spinner.text = 'Loading envs data';
 
-Promise.all(envs.map(env => fetchEnvData(env))).then(function (envsData) {
+Promise.all(envs.map(env => envStatus.fetchEnvData(env))).then(function (envsData) {
   if (envsData.length) {
     spinner.clear();
     envsData = envsData.sort((a, b) => {
@@ -64,9 +58,7 @@ Promise.all(envs.map(env => fetchEnvData(env))).then(function (envsData) {
         status = chalk.red(data.err);
       } else if (data.env == 'production') {
         status = '';
-      } else if (compareVersion(data.version, prdVersion) != 1) {
-        status = chalk.green('Available');
-      } else if (data.env != 'staging' && compareVersion(data.version, stgVersion) == 0) {
+      } else if (envStatus.isEnvAvailableSync(data.env, data.version, stgVersion, prdVersion)) {
         status = chalk.green('Available');
       } else {
         status = chalk.yellow('Using' + (currentVersion == data.version ? ' *' : ''));
@@ -96,25 +88,6 @@ Promise.all(envs.map(env => fetchEnvData(env))).then(function (envsData) {
 })
 .finally(() => spinner.stop());
 
-function compareVersion(a, b) {
-  const r = /^[vV]?\d+\.\d+\.\d+$/;
-  if (!r.test(a) || !r.test(b)) {
-    return 9;
-  }
-  a = a.replace(/^[vV]/, '').split('.');
-  b = b.replace(/^[vV]/, '').split('.');
-  for (let i = 0, l = a.length; i < l; i++) {
-    const ai = parseInt(a[i]);
-    const bi = parseInt(b[i]);
-    if (ai > bi) {
-      return 1;
-    } else if (ai < bi) {
-      return -1;
-    }
-  };
-  return 0;
-}
-
 function getEnvWeight(env) {
   if (env == 'production') {
     return 10;
@@ -123,26 +96,4 @@ function getEnvWeight(env) {
   } else {
     return 30;
   }
-}
-
-function fetchEnvData(env) {
-  return new Promise(function (resolve) {
-    if (typeof config.url != 'function') {
-      resolve({err: ERR.URL_FUNCTION_UNDEFINED, env: env});
-      return;
-    }
-    const url = config.url(env);
-    fetch.fetchUrl(`${url}${url.indexOf('?') > 0 ? '&' : '?'}t=${Date.now()}`, function (error, meta, body) {
-      if (error || meta.status != 200) {
-        resolve({err: ERR.LOAD_ERROR, env: env});
-        return;
-      }
-      try {
-        const data = Object.assign({env: env}, JSON.parse(body.toString()));
-        resolve(data);
-      } catch (err) {
-        resolve({err: ERR.PARSE_RESPONSE_ERROR, env: env});
-      }
-    });
-  });
 }
