@@ -26,6 +26,7 @@ A command to show each env status, whether it is using for testing or available 
   ```json
   {
     "version": "1.1.0",
+    "branch": "master",
     "commit": "17f53ca090d44fd89f805425dee8f21a801a967d",
     "author": "webyom <webyom@gmail.com>",
     "date": 1561874837800
@@ -33,6 +34,7 @@ A command to show each env status, whether it is using for testing or available 
   ```
 
   - `version` is the version defined in package.json
+  - `branch` is the branch you checkout when you publish your project.
   - `commit` is the the HEAD commit hash when you publish your project.
   - `author` is the HEAD commit author when you publish your project.
   - `date` is the timestamp when you publish your project.
