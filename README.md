@@ -51,7 +51,7 @@ A command to show each env status, whether it is using for testing or available 
 
 ## API
 
-- getLastCommit(): object
+- **getLastCommit(): object**
 
   Return the last commit information of current branch as below.
   ```javascript
@@ -63,15 +63,15 @@ A command to show each env status, whether it is using for testing or available 
   }
   ```
 
-- getBranchType(branch: string): string
+- **getBranchType(branch: string): string**
 
   Return branch type, refer to `BRANCH_TYPES` for full possible value list.
 
-- getBranchVersion(branch: string): Promise\<string\>
+- **getBranchVersion(branch: string): Promise\<string\>**
 
   Return a promise of version string of the given branch name.
 
-- compareVersion(v1: string, v2: string): number
+- **compareVersion(v1: string, v2: string): number**
 
   Return value:
   - `1` - v1 > v2
@@ -79,7 +79,7 @@ A command to show each env status, whether it is using for testing or available 
   - `-1` - v1 < v2
   - `9` - v1 or v2 is invalid version
 
-- fetchEnvData(env: string): Promise\<object\>
+- **fetchEnvData(env: string): Promise\<object\>**
 
   Return the last commit information of current branch as below.
   ```javascript
@@ -100,11 +100,11 @@ A command to show each env status, whether it is using for testing or available 
   }
   ```
 
-- isEnvAvailable(env: string): Promise\<bool\>
+- **isEnvAvailable(env: string): Promise\<bool\>**
 
   Return a promise of bool, telling whether an env available.
 
-- FETCH_ERR
+- **FETCH_ERR**
   ```javascript
   {
     CONFIG_UNDEFINED: 'CONFIG_UNDEFINED',
@@ -114,7 +114,7 @@ A command to show each env status, whether it is using for testing or available 
   }
   ```
 
-- BRANCH_TYPES
+- **BRANCH_TYPES**
   ```javascript
   {
     MASTER: 'MASTER', // master
