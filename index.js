@@ -1,4 +1,4 @@
-const execSync = require('child_process').execSync,
+const {execSync, exec} = require('child_process'),
   fs = require('fs'),
   path = require('path'),
   fetch = require('fetch'),
@@ -92,6 +92,27 @@ function getBranchType(branch) {
   return BRANCH_TYPES.INVALID;
 }
 
+function getBranchVersion(branch) {
+  return new Promise(function (resolve, reject) {
+    exec(`git fetch origin ${branch}`, function (err, stdout, stderr) {
+      if (err) {
+        reject(err);
+        return;
+      }
+      try {
+        const m = execSync(`git diff origin/${branch} package.json`).toString().match(/-\s*"version":\s*"(.*?)"/);
+        if (m) {
+          resolve(m[1]);
+        } else {
+          resolve(require(path.resolve('package.json')).version);
+        }
+      } catch (err) {
+        reject(err);
+      }
+    });
+  });
+}
+
 function compareVersion(a, b) {
   const r = /^\d+\.\d+\.\d+$/;
   if (!r.test(a) || !r.test(b)) {
@@ -169,6 +190,7 @@ module.exports = {
   BRANCH_TYPES: BRANCH_TYPES,
   getLastCommit: getLastCommit,
   getBranchType: getBranchType,
+  getBranchVersion: getBranchVersion,
   compareVersion: compareVersion,
   fetchEnvData: fetchEnvData,
   isEnvAvailableSync: isEnvAvailableSync,

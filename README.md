@@ -67,6 +67,10 @@ A command to show each env status, whether it is using for testing or available 
 
   Return branch type, refer to `BRANCH_TYPES` for full possible value list.
 
+- getBranchVersion(branch: string): Promise\<string\>
+
+  Return a promise of version string of the given branch name.
+
 - compareVersion(v1: string, v2: string): number
 
   Return value:
