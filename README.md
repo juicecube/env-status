@@ -11,7 +11,7 @@ A command to show each env status, whether it is using for testing or available 
 
   ```javascript
   module.exports = {
-    envs: ['production', 'staging', 'development'],
+    envs: ['production', 'staging', 'dev', 'dev1', 'dev2', 'dev3'],
     url: function (env) {
       return `https://raw.githubusercontent.com/webyom/env-status/master/envs/${env}.json`;
     }
