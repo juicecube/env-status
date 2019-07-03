@@ -1,0 +1,20 @@
+#!/usr/bin/env node
+
+const fs = require('fs'),
+  path = require('path'),
+  mkdirp = require('mkdirp'),
+  envStatus = require('../index'),
+  pkgInfo = require(path.resolve('package.json'));
+
+const config = envStatus.getConfig();
+
+if (!config) {
+  throw new Error('.envstatus.js file is missing!');
+}
+
+const data = envStatus.getLastCommit();
+data.version = pkgInfo.version;
+
+const outputPath = path.resolve(config.gen || 'build/env-status.json');
+mkdirp.sync(path.dirname(outputPath));
+fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));

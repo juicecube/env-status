@@ -14,12 +14,14 @@ A command to show each env status, whether it is using for testing or available 
     envs: ['production', 'staging', 'dev', 'dev1', 'dev2', 'dev3'],
     url: function (env) {
       return `https://raw.githubusercontent.com/webyom/env-status/master/envs/${env}.json`;
-    }
+    },
+    gen: 'dist/env-status.json'
   };
   ```
 
   - `envs` is an array of the name of all the envs. (required)
   - `url` is a function returning the json file described next part. (required)
+  - `gen` the env status file output path.
 
 - Everytime you publish your project, publish a json file contains blow information.
 

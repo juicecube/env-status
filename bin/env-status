@@ -8,16 +8,15 @@ const fs = require('fs'),
   asTable = require('as-table'),
   envStatus = require('../index');
 
-const configPath = path.resolve('.envstatus.js');
+const config = envStatus.getConfig();
 
 const spinner = ora('Loading .envstatus.js').start();
 
-if (!fs.existsSync(configPath)) {
+if (!config) {
   spinner.fail(`${chalk.yellow('.envstatus.js')} file is missing!`);
   process.exit();
 }
 
-const config = require(configPath);
 
 const requestEnv = process.argv[2];
 const envs = (config.envs || []).filter(env => {

@@ -22,17 +22,18 @@ const BRANCH_TYPES = {
 
 const _envDataCache = {};
 
-function _getConfig() {
+let _config;
+
+function getConfig() {
+  if (_config) {
+    return _config;
+  }
   const configPath = path.resolve('.envstatus.js');
   if (!fs.existsSync(configPath)) {
     return null;
   }
-  const config = require(configPath);
-
-  _getConfig = function () {
-    return config;
-  };
-  return config;
+  _config = require(configPath);
+  return _config;
 }
 
 function _isValidVersion(version, fix) {
@@ -153,7 +154,7 @@ function fetchEnvData(env) {
       resolve(_envDataCache[env]);
       return;
     }
-    const config = _getConfig();
+    const config = getConfig();
     if (!config) {
       resolve({err: FETCH_ERR.CONFIG_UNDEFINED, env: env});
       return;
@@ -203,6 +204,7 @@ function isEnvAvailable(env) {
 module.exports = {
   FETCH_ERR: FETCH_ERR,
   BRANCH_TYPES: BRANCH_TYPES,
+  getConfig: getConfig,
   getLastCommit: getLastCommit,
   getBranchName: getBranchName,
   getBranchType: getBranchType,

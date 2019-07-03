@@ -30,6 +30,7 @@
     "arc-diff": "./bin/arc-diff",
     "arc-land": "./bin/arc-land",
     "env-status": "./bin/env-status",
+    "env-status-gen": "./bin/env-status-gen",
     "env-status-pre-push-hook": "./bin/env-status-pre-push-hook"
   },
   "scripts": {
@@ -38,6 +39,7 @@
   "husky": {
     "hooks": {
       "pre-commit": "npm run eslint",
+      "post-commit": "./bin/env-status-gen",
       "pre-push": "./bin/env-status-pre-push-hook"
     }
   },
@@ -52,6 +54,7 @@
     "babel-eslint": "^8.2.6",
     "eslint": "^6.0.1",
     "eslint-config-webyom": "^1.4.0",
-    "husky": "^3.0.0"
+    "husky": "^3.0.0",
+    "mkdirp": "^0.5.1"
   }
 }
