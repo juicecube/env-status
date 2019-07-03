@@ -1,3 +1,25 @@
 #!/usr/bin/env node
+const path = require('path'),
+  chalk = require('chalk'),
+  envStatus = require('../index');
+const {spawnSync} = require('child_process');
 
-const envStatus = require('../index');
+const branchName = envStatus.getBranchName(),
+  branchType = envStatus.getBranchType();
+
+// 当前分支为others的话不处理
+if (branchType === envStatus.BRANCH_TYPES.OTHERS) {
+  console.log(chalk.yellow(`Branch '${branchName}' is not viable for arc-diff`));
+  process.exit(0);
+}
+
+// 当前分支为特性分支
+if (branchType === envStatus.BRANCH_TYPES.ITERATION_FEATURE) {
+  const originBranchName = envStatus.getVersionFromBranchName(),
+    curVersion = require(path.resolve('package.json')).version;
+  if (curVersion !== originBranchName) {
+    console.log(chalk.red(`The '${branchName}' branch is not viable for arc-diff`));
+    process.exit(1);
+  }
+  spawnSync('arc', ['diff', `origin/${originBranchName}`, '--create'], {stdio: 'inherit'});
+}
