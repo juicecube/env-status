@@ -9,6 +9,18 @@ const fs = require('fs'),
   envStatus = require('../index');
 
 const config = envStatus.getConfig();
+const requestEnv = process.argv[2];
+
+if (requestEnv == '--init') {
+  if (config) {
+    console.log(chalk.yellow('.envstatus.js file already exists!'));
+  } else {
+    const configPath = path.resolve(__dirname, '../.envstatus.js');
+    fs.writeFileSync(path.resolve('.envstatus2.js'), fs.readFileSync(configPath));
+    console.log(chalk.green('.envstatus.js file created!'));
+  }
+  process.exit();
+}
 
 const spinner = ora('Loading .envstatus.js').start();
 
@@ -17,8 +29,6 @@ if (!config) {
   process.exit();
 }
 
-
-const requestEnv = process.argv[2];
 const envs = (config.envs || []).filter(env => {
   if (requestEnv) {
     return typeof env == 'string' && (env == requestEnv || env == 'production');
