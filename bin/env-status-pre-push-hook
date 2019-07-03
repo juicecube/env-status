@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const path = require('path'),
+  chalk = require('chalk'),
   envStatus = require('../index');
 
 const branch = envStatus.getBranchName();
@@ -11,6 +12,7 @@ if (branchType != envStatus.BRANCH_TYPES.OTHERS) {
   const versionInPkg = require(path.resolve('package.json')).version;
 
   if (versionInBranchName != versionInPkg) {
-    throw new Error('Version in branch name is not consistant with version in package.json!');
+    console.log(chalk.red(`Version in branch name ${versionInBranchName} is not consistant with version in package.json ${versionInPkg}!`));
+    process.exit(1);
   }
 }
