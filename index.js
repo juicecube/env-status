@@ -59,7 +59,7 @@ function getLastCommit() {
   const jsonStr = execSync('git show --stat --format="{\\"commit\\": \\"%h\\", \\"author\\": \\"%an\\", \\"date\\": \\"%aD\\", \\"branch\\": \\"%D\\"}|"').toString().split('|')[0];
   const res = JSON.parse(jsonStr);
   res.date = moment(res.date).valueOf();
-  res.branch = res.branch.match(/-> (.*?),/)[1];
+  res.branch = res.branch.match(/-> (.*?)(,|$)/)[1];
   return res;
 }
 
