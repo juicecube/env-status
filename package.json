@@ -33,11 +33,12 @@
     "env-status-pre-push-hook": "./bin/env-status-pre-push-hook"
   },
   "scripts": {
-    "eslint": "npx eslint index.js bin/*"
+    "eslint": "npx eslint *.js bin/*"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run eslint"
+      "pre-commit": "npm run eslint",
+      "pre-push": "./bin/env-status-pre-push-hook"
     }
   },
   "dependencies": {

@@ -7,8 +7,6 @@
   "extends": [
     "webyom"
   ],
-  "globals": {
-  },
   "rules": {
     "no-console": 0,
     "no-func-assign": 0

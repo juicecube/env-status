@@ -1,4 +1,5 @@
 const {execSync, exec} = require('child_process'),
+  os = require('os'),
   fs = require('fs'),
   path = require('path'),
   fetch = require('fetch'),
@@ -12,12 +13,11 @@ const FETCH_ERR = {
 };
 
 const BRANCH_TYPES = {
-  MASTER: 'MASTER',
   ITERATION: 'ITERATION',
   ITERATION_FEATURE: 'ITERATION_FEATURE',
   ITERATION_FIX: 'ITERATION_FIX',
   HOTFIX: 'HOTFIX',
-  INVALID: 'INVALID'
+  OTHERS: 'OTHERS'
 };
 
 const _envDataCache = {};
@@ -62,22 +62,28 @@ function getLastCommit() {
   return res;
 }
 
-function getBranchType(branch) {
-  if (branch == 'master') {
-    return BRANCH_TYPES.MASTER;
+function getBranchName() {
+  const res = execSync('git branch').toString().split(os.EOL).find(x => x.startsWith('*'));
+  if (res) {
+    return res.slice(1).trim();
+  } else {
+    return '';
   }
+}
+
+function getBranchType(branch) {
   if ((/^\d+\.\d+\.\d+$/).test(branch)) {
     if (_isValidVersion(branch)) {
       return BRANCH_TYPES.ITERATION;
     } else {
-      return BRANCH_TYPES.INVALID;
+      return BRANCH_TYPES.OTHERS;
     }
   }
   if ((/^\d+\.\d+\.\d+-feat-.+$/).test(branch)) {
     if (_isValidVersion(branch.split('-')[0])) {
       return BRANCH_TYPES.ITERATION_FEATURE;
     } else {
-      return BRANCH_TYPES.INVALID;
+      return BRANCH_TYPES.OTHERS;
     }
   }
   if ((/^\d+\.\d+\.\d+-fix-.+$/).test(branch)) {
@@ -87,13 +93,13 @@ function getBranchType(branch) {
     } else if (_isValidVersion(version, true)) {
       return BRANCH_TYPES.HOTFIX;
     } else {
-      return BRANCH_TYPES.INVALID;
+      return BRANCH_TYPES.OTHERS;
     }
   }
-  return BRANCH_TYPES.INVALID;
+  return BRANCH_TYPES.OTHERS;
 }
 
-function getBranchVersion(branch) {
+function getOriginBranchVersion(branch) {
   return new Promise(function (resolve, reject) {
     exec(`git fetch origin ${branch}`, function (err, stdout, stderr) {
       if (err) {
@@ -112,6 +118,14 @@ function getBranchVersion(branch) {
       }
     });
   });
+}
+
+function getVersionFromBranchName(branch) {
+  if (getBranchType(branch) != BRANCH_TYPES.OTHERS) {
+    return branch.split('-')[0];
+  } else {
+    return '';
+  }
 }
 
 function compareVersion(a, b) {
@@ -190,8 +204,10 @@ module.exports = {
   FETCH_ERR: FETCH_ERR,
   BRANCH_TYPES: BRANCH_TYPES,
   getLastCommit: getLastCommit,
+  getBranchName: getBranchName,
   getBranchType: getBranchType,
-  getBranchVersion: getBranchVersion,
+  getOriginBranchVersion: getOriginBranchVersion,
+  getVersionFromBranchName: getVersionFromBranchName,
   compareVersion: compareVersion,
   fetchEnvData: fetchEnvData,
   isEnvAvailableSync: isEnvAvailableSync,

@@ -63,13 +63,21 @@ A command to show each env status, whether it is using for testing or available 
   }
   ```
 
+- **getBranchName(): string**
+
+  Return current working branch name.
+
 - **getBranchType(branch: string): string**
 
   Return branch type, refer to `BRANCH_TYPES` for full possible value list.
 
-- **getBranchVersion(branch: string): Promise\<string\>**
+- **getOriginBranchVersion(branch: string): Promise\<string\>**
 
-  Return a promise of version string of the given branch name.
+  Return a promise of version string of the given branch name in origin.
+
+- **getVersionFromBranchName(branch: string): string**
+
+  Return a version string if the given branch name contains version.
 
 - **compareVersion(v1: string, v2: string): number**
 
@@ -117,12 +125,11 @@ A command to show each env status, whether it is using for testing or available 
 - **BRANCH_TYPES**
   ```javascript
   {
-    MASTER: 'MASTER', // master
     ITERATION: 'ITERATION', // x.x.0
     ITERATION_FEATURE: 'ITERATION_FEATURE', // x.x.0-feat-xxx
     ITERATION_FIX: 'ITERATION_FIX', // x.x.0-fix-xxx
     HOTFIX: 'HOTFIX', // x.x.y-fix-xxx, y > 0
-    INVALID: 'INVALID'
+    OTHERS: 'OTHERS'
   }
   ```
 
