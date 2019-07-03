@@ -28,6 +28,7 @@ function _getConfig() {
     return null;
   }
   const config = require(configPath);
+
   _getConfig = function () {
     return config;
   };
@@ -59,7 +60,7 @@ function getLastCommit() {
   res.date = moment(res.date).valueOf();
   res.branch = res.branch.match(/-> (.*?),/)[1];
   return res;
-};
+}
 
 function getBranchType(branch) {
   if (branch == 'master') {
@@ -128,7 +129,7 @@ function compareVersion(a, b) {
     } else if (ai < bi) {
       return -1;
     }
-  };
+  }
   return 0;
 }
 
@@ -177,7 +178,7 @@ function isEnvAvailableSync(env, envVersion, stgVersion, prdVersion) {
 }
 
 function isEnvAvailable(env) {
-  return Promise.all(['production', 'staging', env].map(env => envStatus.fetchEnvData(env))).then(function (envsData) {
+  return Promise.all(['production', 'staging', env].map(env => fetchEnvData(env))).then(function (envsData) {
     if (!envsData[2].version) {
       return false;
     }

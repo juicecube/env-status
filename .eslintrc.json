@@ -1,0 +1,16 @@
+{
+  "env": {
+    "node": true,
+    "commonjs": true,
+    "es6": true
+  },
+  "extends": [
+    "webyom"
+  ],
+  "globals": {
+  },
+  "rules": {
+    "no-console": 0,
+    "no-func-assign": 0
+  }
+}

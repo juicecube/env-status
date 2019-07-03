@@ -27,14 +27,30 @@
   ],
   "main": "index.js",
   "bin": {
-    "env-status": "./bin/env-status"
+    "arc-diff": "./bin/arc-diff",
+    "arc-land": "./bin/arc-land",
+    "env-status": "./bin/env-status",
+    "env-status-pre-push-hook": "./bin/env-status-pre-push-hook"
   },
-  "scripts": {},
+  "scripts": {
+    "eslint": "npx eslint index.js bin/*"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run eslint"
+    }
+  },
   "dependencies": {
     "as-table": "^1.0.52",
     "chalk": "^2.4.2",
     "fetch": "^1.1.0",
     "moment": "^2.24.0",
     "ora": "^3.4.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.6",
+    "eslint": "^6.0.1",
+    "eslint-config-webyom": "^1.4.0",
+    "husky": "^3.0.0"
   }
 }
