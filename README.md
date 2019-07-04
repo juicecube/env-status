@@ -1,4 +1,7 @@
 # env-status
+
+[![CircleCI](https://circleci.com/gh/webyom/env-status.svg?style=svg)](https://circleci.com/gh/webyom/env-status)
+
 A command to show each env status, whether it is using for testing or available for using.
 
 ## Setup

@@ -38,3 +38,6 @@ jobs:
 
       # run tests!
       - run: yarn test
+
+      # upload codecov!
+      - run: npx codecov
