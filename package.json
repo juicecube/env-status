@@ -34,11 +34,12 @@
     "env-status-pre-push-hook": "./bin/env-status-pre-push-hook"
   },
   "scripts": {
-    "eslint": "npx eslint *.js bin/*"
+    "eslint": "npx eslint *.js bin/*",
+    "test": "jest"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run eslint",
+      "pre-commit": "npm run eslint && npm run test",
       "post-commit": "./bin/env-status-gen",
       "pre-push": "./bin/env-status-pre-push-hook"
     }
@@ -55,6 +56,7 @@
     "eslint": "^6.0.1",
     "eslint-config-webyom": "^1.4.0",
     "husky": "^3.0.0",
+    "jest": "^24.8.0",
     "mkdirp": "^0.5.1"
   }
 }
