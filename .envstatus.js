@@ -3,5 +3,5 @@ module.exports = {
   url: function (env) {
     return `https://raw.githubusercontent.com/webyom/env-status/master/envs/${env}.json`;
   },
-  gen: 'dist/env-status.json'
+  gen: 'build/env-status.json'
 };

@@ -1,4 +1,8 @@
 # env-status
+
+[![CircleCI](https://circleci.com/gh/webyom/env-status.svg?style=svg)](https://circleci.com/gh/webyom/env-status)
+[![codecov](https://codecov.io/gh/webyom/env-status/branch/master/graph/badge.svg)](https://codecov.io/gh/webyom/env-status)
+
 A command to show each env status, whether it is using for testing or available for using.
 
 ## Setup
@@ -43,13 +47,33 @@ A command to show each env status, whether it is using for testing or available 
 
 ## Command
 
-`npx env-status` will show all the env status
+- **npx env-status**
 
-![npx env-status](https://raw.githubusercontent.com/webyom/env-status/master/img/result-1.png)
+  `npx env-status` will show all the env status
 
-`npx env-status staging` will show staging and production (if defined) status
+  ![npx env-status](https://raw.githubusercontent.com/webyom/env-status/master/img/result-1.png)
 
-![npx env-status staging](https://raw.githubusercontent.com/webyom/env-status/master/img/result-2.png)
+  `npx env-status staging` will show staging and production (if defined) status
+
+  ![npx env-status staging](https://raw.githubusercontent.com/webyom/env-status/master/img/result-2.png)
+
+  `npx env-status --init` will create `.envstatus.js` config file in your project root.
+
+- **env-status-gen**
+
+  Generate the json file containin for publishing.
+
+- **env-status-pre-push-hook**
+
+  Config this command as your git pre-push hook.
+
+- **arc-diff**
+
+  This command will do some consistance and confliction validation, then do arc diff.
+
+- **arc-land**
+
+  This command will do some consistance and confliction validation, then do arc land.
 
 ## API
 

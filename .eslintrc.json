@@ -2,13 +2,13 @@
   "env": {
     "node": true,
     "commonjs": true,
-    "es6": true
+    "es6": true,
+    "jest": true
   },
   "extends": [
     "webyom"
   ],
   "rules": {
-    "no-console": 0,
-    "no-func-assign": 0
+    "no-console": 0
   }
 }

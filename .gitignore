@@ -1,4 +1,5 @@
 package-lock.json
+/build/
 
 ### Bower ###
 bower_components
