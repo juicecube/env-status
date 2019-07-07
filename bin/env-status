@@ -44,7 +44,7 @@ if (requestEnv && envs.length < 2) {
   }
 }
 
-const currentVersion = (function () {
+const currentVersion = (() => {
   try {
     const pkgInfo = require(path.resolve('package.json'));
 
@@ -56,22 +56,19 @@ const currentVersion = (function () {
 
 spinner.text = 'Loading envs data';
 
-Promise.all(envs.map(env => envStatus.fetchEnvData(env))).then(function (envsData) {
+Promise.all(envs.map(env => envStatus.fetchEnvData(env))).then(async envsData => {
   if (envsData.length) {
     spinner.clear();
     envsData = envsData.sort((a, b) => {
       return getEnvWeight(a.env) - getEnvWeight(b.env) + (a.date > b.date ? -1 : a.date < b.date ? 1 : 0);
     });
-    const prdVersion = envsData[0].env == 'production' ? envsData[0].version : '';
-    const stgIndex = prdVersion && envsData.length > 1 ? 1 : 0;
-    const stgVersion = envsData[stgIndex].env == 'staging' ? envsData[stgIndex].version : '';
-    envsData = envsData.map(data => {
+    envsData = await Promise.all(envsData.map(async data => {
       let status;
       if (data.err) {
         status = chalk.red(data.err);
       } else if (data.env == 'production') {
         status = '';
-      } else if (envStatus.isEnvAvailableSync(data.env, data.version, stgVersion, prdVersion)) {
+      } else if (await envStatus.isEnvAvailable(data.env)) {
         status = chalk.green('Available');
       } else {
         status = chalk.yellow('Using' + (currentVersion == data.version ? ' *' : ''));
@@ -87,7 +84,7 @@ Promise.all(envs.map(env => envStatus.fetchEnvData(env))).then(function (envsDat
         since: data.date && moment(data.date).fromNow()
       };
       return res;
-    });
+    }));
     console.log('');
     console.log(asTable(envsData));
     console.log('');
