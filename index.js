@@ -101,8 +101,8 @@ function getBranchType(branch) {
 }
 
 function getOriginBranchVersion(branch) {
-  return new Promise(function (resolve, reject) {
-    exec(`git fetch origin ${branch}`, function (err, stdout, stderr) {
+  return new Promise((resolve, reject) => {
+    exec(`git fetch origin ${branch}`, err => {
       if (err) {
         reject(err);
         return;
@@ -149,7 +149,7 @@ function compareVersion(a, b) {
 }
 
 function fetchEnvData(env) {
-  return new Promise(function (resolve) {
+  return new Promise(resolve => {
     if (_envDataCache[env]) {
       resolve(_envDataCache[env]);
       return;
@@ -164,28 +164,29 @@ function fetchEnvData(env) {
       return;
     }
     const url = config.url(env);
-    fetch.fetchUrl(`${url}${url.indexOf('?') > 0 ? '&' : '?'}t=${Date.now()}`, function (error, meta, body) {
+    fetch.fetchUrl(`${url}${url.indexOf('?') > 0 ? '&' : '?'}t=${Date.now()}`, (error, meta, body) => {
+      let data;
       if (error || meta.status != 200) {
-        resolve({err: FETCH_ERR.LOAD_ERROR, env: env});
-        return;
+        data = {err: FETCH_ERR.LOAD_ERROR, env: env};
+      } else {
+        try {
+          data = Object.assign({env: env}, JSON.parse(body.toString()));
+        } catch (err) {
+          data = {err: FETCH_ERR.PARSE_RESPONSE_ERROR, env: env};
+        }
       }
-      try {
-        const data = Object.assign({env: env}, JSON.parse(body.toString()));
-        _envDataCache[env] = data;
-        resolve(data);
-      } catch (err) {
-        resolve({err: FETCH_ERR.PARSE_RESPONSE_ERROR, env: env});
-      }
+      _envDataCache[env] = data;
+      resolve(data);
     });
   });
 }
 
-function isEnvAvailableSync(env, envVersion, stgVersion, prdVersion) {
-  if (env == 'production') {
+function _isEnvAvailableSync(envData = {}, stgData = {}, prdData = {}) {
+  if (envData.env == 'production') {
     return true;
-  } else if (compareVersion(envVersion, prdVersion) != 1) {
+  } else if (compareVersion(envData.version, prdData.version) != 1) {
     return true;
-  } else if (env != 'staging' && compareVersion(envVersion, stgVersion) == 0) {
+  } else if (envData.env != 'staging' && compareVersion(envData.version, stgData.version) == 0) {
     return true;
   } else {
     return false;
@@ -193,11 +194,11 @@ function isEnvAvailableSync(env, envVersion, stgVersion, prdVersion) {
 }
 
 function isEnvAvailable(env) {
-  return Promise.all(['production', 'staging', env].map(env => fetchEnvData(env))).then(function (envsData) {
+  return Promise.all(['production', 'staging', env].map(env => fetchEnvData(env))).then(envsData => {
     if (!envsData[2].version) {
       return false;
     }
-    return isEnvAvailableSync(env, envsData[2].version, envsData[1].version, envsData[0].version);
+    return _isEnvAvailableSync(envsData[2], envsData[1], envsData[0]);
   });
 }
 
@@ -212,6 +213,5 @@ module.exports = {
   getVersionFromBranchName: getVersionFromBranchName,
   compareVersion: compareVersion,
   fetchEnvData: fetchEnvData,
-  isEnvAvailableSync: isEnvAvailableSync,
   isEnvAvailable: isEnvAvailable
 };
