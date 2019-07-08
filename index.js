@@ -165,17 +165,18 @@ function fetchEnvData(env) {
     }
     const url = config.url(env);
     fetch.fetchUrl(`${url}${url.indexOf('?') > 0 ? '&' : '?'}t=${Date.now()}`, (error, meta, body) => {
+      let data;
       if (error || meta.status != 200) {
-        resolve({err: FETCH_ERR.LOAD_ERROR, env: env});
-        return;
+        data = {err: FETCH_ERR.LOAD_ERROR, env: env};
+      } else {
+        try {
+          data = Object.assign({env: env}, JSON.parse(body.toString()));
+        } catch (err) {
+          data = {err: FETCH_ERR.PARSE_RESPONSE_ERROR, env: env};
+        }
       }
-      try {
-        const data = Object.assign({env: env}, JSON.parse(body.toString()));
-        _envDataCache[env] = data;
-        resolve(data);
-      } catch (err) {
-        resolve({err: FETCH_ERR.PARSE_RESPONSE_ERROR, env: env});
-      }
+      _envDataCache[env] = data;
+      resolve(data);
     });
   });
 }
