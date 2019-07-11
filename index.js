@@ -1,4 +1,4 @@
-const {execSync, exec} = require('child_process'),
+const {execFileSync, execFile} = require('child_process'),
   os = require('os'),
   fs = require('fs'),
   path = require('path'),
@@ -56,7 +56,7 @@ function _isValidVersion(version, fix) {
 }
 
 function getLastCommit() {
-  const jsonStr = execSync('git show --stat --format="{\\"commit\\": \\"%h\\", \\"author\\": \\"%an\\", \\"date\\": \\"%aD\\", \\"branch\\": \\"%D\\"}|"').toString().split('|')[0];
+  const jsonStr = execFileSync('git', ['show', '--stat', '--format={"commit": "%h", "author": "%an", "date": "%aD", "branch": "%D"}|||']).toString().split('|||')[0];
   const res = JSON.parse(jsonStr);
   res.date = moment(res.date).valueOf();
   res.branch = res.branch.match(/-> (.*?)(,|$)/)[1];
@@ -64,7 +64,7 @@ function getLastCommit() {
 }
 
 function getBranchName() {
-  const res = execSync('git branch').toString().split(os.EOL).find(x => x.startsWith('*'));
+  const res = execFileSync('git', ['branch']).toString().split(os.EOL).find(x => x.startsWith('*'));
   if (res) {
     return res.slice(1).trim();
   } else {
@@ -102,13 +102,13 @@ function getBranchType(branch) {
 
 function getOriginBranchVersion(branch) {
   return new Promise((resolve, reject) => {
-    exec(`git fetch origin ${branch}`, err => {
+    execFile('git', ['fetch', 'origin', branch], err => {
       if (err) {
         reject(err);
         return;
       }
       try {
-        const m = execSync(`git diff origin/${branch} package.json`).toString().match(/-\s*"version":\s*"(.*?)"/);
+        const m = execFileSync('git', ['diff', `origin/${branch}`, 'package.json']).toString().match(/-\s*"version":\s*"(.*?)"/);
         if (m) {
           resolve(m[1]);
         } else {
