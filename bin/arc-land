@@ -36,7 +36,7 @@ const landLocalBranch = (branch, result = 0) => {
 
 // 当前分支为others的话不处理
 if (branchType === BRANCH_TYPES.OTHERS) {
-  console.log(chalk.yellow(`Branch '${branchName}' is not viable for arc-diff.`));
+  console.log(chalk.yellow(`Branch '${branchName}' is not viable for arc-land.`));
   process.exit(0);
 }
 
