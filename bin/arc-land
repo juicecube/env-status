@@ -47,23 +47,30 @@ if (branchType === BRANCH_TYPES.ITERATION_FEATURE) {
 
 // 当前分支为迭代公共分支
 if (branchType == BRANCH_TYPES.ITERATION) {
-  envStatus.getOriginBranchVersion('master').then((masterVersion) => {
-    envStatus.fetchEnvData('staging').then((sVersion) => {
-      // staging环境是否异常
-      if (sVersion !== masterVersion || sVersion.err) {
-        console.log(chalk.red('Staging environment should keep same version with master!'));
+  Promise.all([
+    envStatus.getOriginBranchVersion('master'),
+    envStatus.fetchEnvData('staging'),
+  ]).then((values) => {
+    const masterVersion = values[0];
+    const stagingVersion = values[1];
+
+    // staging环境是否异常
+    if (stagingVersion !== masterVersion || stagingVersion.err) {
+      console.log(chalk.red('Staging environment should keep same version with master!'));
+      process.exit(1);
+    }
+    envStatus.fetchEnvData('production').then((pVersion) => {
+      // production环境是否和master一致并且当前分支版本大于master
+      if (pVersion === masterVersion && envStatus.compareVersion(localVersion, masterVersion) === 1) {
+        createLand('master');
+      } else {
+        console.log(chalk.red(`The '${branchName}' branch is not viable for arc-land`));
         process.exit(1);
       }
-      envStatus.fetchEnvData('production').then((pVersion) => {
-        // production环境是否和master一致并且当前分支版本大于master
-        if (pVersion === masterVersion && envStatus.compareVersion(localVersion, masterVersion) === 1) {
-          createLand('master');
-        } else {
-          console.log(chalk.red(`The '${branchName}' branch is not viable for arc-land`));
-          process.exit(1);
-        }
-      });
     });
+  }).catch((err) => {
+    console.log(chalk.red('Need more Staging or Production environment info!'));
+    process.exit(1);
   });
 }
 
