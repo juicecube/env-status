@@ -76,7 +76,20 @@ if (branchType == BRANCH_TYPES.ITERATION) {
 
 // 当前分支为迭代fix分支
 if (branchType === BRANCH_TYPES.ITERATION_FIX) {
-  landLocalBranch('master', 0);
+  Promise.all([
+    envStatus.getOriginBranchVersion('master'),
+    envStatus.fetchEnvData('production'),
+  ]).then((values) => {
+    const masterVersion = values[0];
+    const prodVersion = values[1];
+
+    if (envStatus.compareVersion(masterVersion, prodVersion) === 1) {
+      landLocalBranch('master', 0);
+    }
+  }).catch((err) => {
+    console.log(chalk.red('Need more Staging or Production environment info!'));
+    process.exit(1);
+  });
 }
 
 // 当前分支为hotfix分支
