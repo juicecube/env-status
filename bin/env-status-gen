@@ -11,6 +11,6 @@ const config = envStatus.getConfig();
 const data = envStatus.getLastCommit();
 data.version = pkgInfo.version;
 
-const outputPath = path.resolve(config && config.gen || 'build/env-status.json');
+const outputPath = path.resolve(config && config.gen || 'env-status.json');
 mkdirp.sync(path.dirname(outputPath));
 fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));

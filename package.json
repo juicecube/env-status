@@ -1,6 +1,6 @@
 {
   "name": "env-status",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "A command to show each env status, whether it is using for testing or available for using.",
   "keywords": [
     "env",
@@ -51,6 +51,7 @@
     "as-table": "^1.0.52",
     "chalk": "^2.4.2",
     "fetch": "^1.1.0",
+    "mkdirp": "^0.5.1",
     "moment": "^2.24.0",
     "ora": "^3.4.0"
   },
@@ -60,7 +61,6 @@
     "eslint": "^6.0.1",
     "eslint-config-webyom": "^1.4.0",
     "husky": "^3.0.0",
-    "jest": "^24.8.0",
-    "mkdirp": "^0.5.1"
+    "jest": "^24.8.0"
   }
 }
