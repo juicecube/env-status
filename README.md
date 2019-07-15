@@ -59,7 +59,9 @@ A command to show each env status, whether it is using for testing or available 
 
   `npx env-status --init` will create `.envstatus.js` config file in your project root.
 
-  `npx env-status --gen` will generate the json file for publishing.
+- **env-status-gen**
+
+  Generate the json file for publishing.
 
 - **env-status-pre-push-hook**
 
