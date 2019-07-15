@@ -2,6 +2,7 @@
 
 const fs = require('fs'),
   path = require('path'),
+  mkdirp = require('mkdirp'),
   moment = require('moment'),
   chalk = require('chalk'),
   ora = require('ora'),
@@ -19,6 +20,18 @@ if (requestEnv == '--init') {
     fs.writeFileSync(path.resolve('.envstatus2.js'), fs.readFileSync(configPath));
     console.log(chalk.green('.envstatus.js file created!'));
   }
+  process.exit();
+}
+
+if (requestEnv == '--gen') {
+  const pkgInfo = require(path.resolve('package.json'));
+
+  const data = envStatus.getLastCommit();
+  data.version = pkgInfo.version;
+
+  const outputPath = path.resolve(config && config.gen || 'env-status.json');
+  mkdirp.sync(path.dirname(outputPath));
+  fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
   process.exit();
 }
 

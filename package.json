@@ -1,6 +1,6 @@
 {
   "name": "env-status",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "description": "A command to show each env status, whether it is using for testing or available for using.",
   "keywords": [
     "env",
@@ -33,7 +33,6 @@
     "arc-diff": "./bin/arc-diff",
     "arc-land": "./bin/arc-land",
     "env-status": "./bin/env-status",
-    "env-status-gen": "./bin/env-status-gen",
     "env-status-pre-push-hook": "./bin/env-status-pre-push-hook"
   },
   "scripts": {
@@ -43,7 +42,7 @@
   "husky": {
     "hooks": {
       "pre-commit": "npm run eslint && npm run test",
-      "post-commit": "./bin/env-status-gen",
+      "post-commit": "./bin/env-status --gen",
       "pre-push": "./bin/env-status-pre-push-hook"
     }
   },
