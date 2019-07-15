@@ -1,5 +1,5 @@
 package-lock.json
-/build/
+env-status.json
 
 ### Bower ###
 bower_components
