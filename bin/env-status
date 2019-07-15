@@ -29,7 +29,7 @@ if (requestEnv == '--gen') {
   const data = envStatus.getLastCommit();
   data.version = pkgInfo.version;
 
-  const outputPath = path.resolve(config && config.gen || 'env-status.json');
+  const outputPath = path.resolve(config && config.gen || 'dist/env-status.json');
   mkdirp.sync(path.dirname(outputPath));
   fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
   process.exit();

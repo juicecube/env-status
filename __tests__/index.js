@@ -1,7 +1,7 @@
 const envStatus = require('../index');
 
 test('getConfig', () => {
-  expect(envStatus.getConfig().gen).toEqual('env-status.json');
+  expect(envStatus.getConfig().gen).toEqual('dist/env-status.json');
 });
 
 describe('getBranchType', () => {

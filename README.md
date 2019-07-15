@@ -47,7 +47,7 @@ A command to show each env status, whether it is using for testing or available 
 
 ## Command
 
-- **npx env-status**
+- **env-status**
 
   `npx env-status` will show all the env status
 
