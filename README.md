@@ -49,17 +49,17 @@ A command to show each env status, whether it is using for testing or available 
 
 - **env-status**
 
-  `npx env-status` will show all the env status
+  `npx -p env-status env-status` will show all the env status
 
-  ![npx env-status](https://raw.githubusercontent.com/webyom/env-status/master/img/result-1.png)
+  ![npx -p env-status env-status](https://raw.githubusercontent.com/webyom/env-status/master/img/result-1.png)
 
-  `npx env-status staging` will show staging and production (if defined) status
+  `npx -p env-status env-status staging` will show staging and production (if defined) status
 
-  ![npx env-status staging](https://raw.githubusercontent.com/webyom/env-status/master/img/result-2.png)
+  ![npx -p env-status env-status staging](https://raw.githubusercontent.com/webyom/env-status/master/img/result-2.png)
 
-  `npx env-status --init` will create `.envstatus.js` config file in your project root.
+  `npx -p env-status env-status --init` will create `.envstatus.js` config file in your project root.
 
-  `npx env-status --gen` will generate the json file for publishing.
+  `npx -p env-status env-status --gen` will generate the json file for publishing.
 
 - **env-status-pre-push-hook**
 
