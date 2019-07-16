@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const path = require('path'),
+  Promise = require('bluebird'),
   chalk = require('chalk'),
   envStatus = require('../index');
 const {spawnSync} = require('child_process');

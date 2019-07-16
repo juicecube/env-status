@@ -1,4 +1,4 @@
-const envStatus = require('../index');
+const envStatus = require('../lib/index');
 
 test('getConfig', () => {
   expect(envStatus.getConfig().gen).toEqual('dist/env-status.json');

@@ -2,6 +2,7 @@ const {execFileSync, execFile} = require('child_process'),
   os = require('os'),
   fs = require('fs'),
   path = require('path'),
+  Promise = require('bluebird'),
   fetch = require('fetch'),
   moment = require('moment');
 
