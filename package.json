@@ -43,8 +43,8 @@
   "husky": {
     "hooks": {
       "pre-commit": "npm run eslint && npm run test",
-      "post-commit": "./bin/env-status --gen",
-      "pre-push": "./bin/env-status-pre-push-hook"
+      "post-commit": "./lib/bin/env-status.js --gen",
+      "pre-push": "./lib/bin/env-status-pre-push-hook.js"
     }
   },
   "dependencies": {
