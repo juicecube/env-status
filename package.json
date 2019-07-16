@@ -37,7 +37,7 @@
   },
   "scripts": {
     "build": "babel src -d lib",
-    "eslint": "npx eslint *.js bin/*",
+    "eslint": "npx eslint src",
     "test": "jest"
   },
   "husky": {
