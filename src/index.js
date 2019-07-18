@@ -59,13 +59,13 @@ function _isValidVersion(version, fix) {
 function getLastCommit() {
   let jsonStr;
   try {
-    jsonStr = execFileSync('git', ['show', '--stat', '--format={"commit": "%h", "author": "%an", "date": "%aD", "branch": "%D"}|||']).toString().split('|||')[0];
+    jsonStr = execFileSync('git', ['show', '--stat', '--format={"commit": "%h", "author": "%an", "date": "%aD", "branch": "%d"}|||']).toString().split('|||')[0];
   } catch (err) {
     jsonStr = fs.readFileSync('last-commit.txt').toString().split('|||')[0];
   }
   const res = JSON.parse(jsonStr);
   res.date = moment(res.date).valueOf();
-  res.branch = res.branch.match(/-> (.*?)(,|$)/)[1];
+  res.branch = res.branch.match(/(?<= )\S*(?=\))/)[0];
   return res;
 }
 
