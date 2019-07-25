@@ -197,19 +197,26 @@ function _isEnvAvailableSync(envData = {}, stgData = {}, prdData = {}) {
       return true;
     }
   } else {
-    const compareRes = compareVersion(envData.version, prdData.version);
+    let compareRes = compareVersion(envData.version, stgData.version);
     if (compareRes == 1) {
       return false;
     } if (compareRes == 0) {
       return true;
     } else {
-      try {
-        execFileSync('git', ['fetch', 'origin']);
-        execFileSync('git', ['merge-base', '--is-ancestor', envData.commit, prdData.commit]);
-      } catch (err) {
+      compareRes = compareVersion(envData.version, prdData.version);
+      if (compareRes == 1) {
         return false;
+      } if (compareRes == 0) {
+        return true;
+      } else {
+        try {
+          execFileSync('git', ['fetch', 'origin']);
+          execFileSync('git', ['merge-base', '--is-ancestor', envData.commit, prdData.commit]);
+        } catch (err) {
+          return false;
+        }
+        return true;
       }
-      return true;
     }
   }
 }

@@ -72,7 +72,6 @@ spinner.text = 'Loading envs data';
 
 Promise.all(envs.map(env => envStatus.fetchEnvData(env))).then(async envsData => {
   if (envsData.length) {
-    spinner.stop();
     envsData = envsData.sort((a, b) => {
       return getEnvWeight(a.env) - getEnvWeight(b.env) + (a.date > b.date ? -1 : a.date < b.date ? 1 : 0);
     });
@@ -99,6 +98,7 @@ Promise.all(envs.map(env => envStatus.fetchEnvData(env))).then(async envsData =>
       };
       return res;
     }));
+    spinner.stop();
     console.log('');
     console.log(asTable(envsData));
     console.log('');
