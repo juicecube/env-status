@@ -190,12 +190,27 @@ function fetchEnvData(env) {
 function _isEnvAvailableSync(envData = {}, stgData = {}, prdData = {}) {
   if (envData.env == 'production') {
     return true;
-  } else if (compareVersion(envData.version, prdData.version) != 1) {
-    return true;
-  } else if (envData.env != 'staging' && compareVersion(envData.version, stgData.version) == 0) {
-    return true;
+  } else if (envData.env == 'staging') {
+    if (compareVersion(envData.version, prdData.version) == 1) {
+      return false;
+    } else {
+      return true;
+    }
   } else {
-    return false;
+    const compareRes = compareVersion(envData.version, prdData.version);
+    if (compareRes == 1) {
+      return false;
+    } if (compareRes == 0) {
+      return true;
+    } else {
+      try {
+        execFileSync('git', ['fetch', 'origin']);
+        execFileSync('git', ['merge-base', '--is-ancestor', envData.commit, prdData.commit]);
+      } catch (err) {
+        return false;
+      }
+      return true;
+    }
   }
 }
 
