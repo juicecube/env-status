@@ -1,6 +1,6 @@
 {
   "name": "env-status",
-  "version": "0.24.2",
+  "version": "0.25.0",
   "description": "A command to show each env status, whether it is using for testing or available for using.",
   "keywords": [
     "env",
