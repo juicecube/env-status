@@ -72,7 +72,7 @@ spinner.text = 'Loading envs data';
 
 Promise.all(envs.map(env => envStatus.fetchEnvData(env))).then(async envsData => {
   if (envsData.length) {
-    spinner.clear();
+    spinner.stop();
     envsData = envsData.sort((a, b) => {
       return getEnvWeight(a.env) - getEnvWeight(b.env) + (a.date > b.date ? -1 : a.date < b.date ? 1 : 0);
     });
@@ -107,10 +107,9 @@ Promise.all(envs.map(env => envStatus.fetchEnvData(env))).then(async envsData =>
   }
 })
   .catch(err => {
-    spinner.clear();
+    spinner.stop();
     console.error(err);
-  })
-  .finally(() => spinner.stop());
+  });
 
 function getEnvWeight(env) {
   if (env == 'production') {
