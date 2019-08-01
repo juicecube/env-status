@@ -23,17 +23,24 @@ const BRANCH_TYPES = {
 
 const _envDataCache = {};
 
-let _config;
-
-let _fetchOrigin = function (callback) {
-  execFile('git', ['fetch', 'origin'], err => {
-    if (!err) {
-      _fetchOrigin = function () {};
-    }
-    callback(err);
+let _fetchOriginPromise;
+function _fetchOrigin() {
+  if (_fetchOriginPromise) {
+    return _fetchOriginPromise;
+  }
+  return _fetchOriginPromise = new Promise((resolve, reject) => {
+    execFile('git', ['fetch', 'origin'], err => {
+      if (err) {
+        _fetchOriginPromise = null;
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
   });
-};
+}
 
+let _config;
 function getConfig() {
   if (_config) {
     return _config;
@@ -223,19 +230,15 @@ function isEnvAvailable(env) {
         } if (compareRes == 0) {
           return true;
         } else {
-          return new Promise(resolve => {
-            _fetchOrigin(err => {
-              if (err) {
-                resolve(false);
-              } else {
-                try {
-                  execFileSync('git', ['merge-base', '--is-ancestor', envData.commit, prdData.commit]);
-                  resolve(true);
-                } catch (err) {
-                  resolve(false);
-                }
-              }
-            });
+          return _fetchOrigin().then(() => {
+            try {
+              execFileSync('git', ['merge-base', '--is-ancestor', envData.commit, prdData.commit]);
+              return true;
+            } catch (err) {
+              return false;
+            }
+          }).catch(err => {
+            return false;
           });
         }
       }
