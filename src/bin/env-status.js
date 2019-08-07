@@ -71,7 +71,7 @@ const currentVersion = (() => {
 
     return pkgInfo.version;
   } catch (err) {
-    // do nothing
+    console.error(err);
   }
 })();
 
@@ -107,7 +107,7 @@ Promise.all(envs.map(env => envStatus.fetchEnvData(env))).then(async envsData =>
     }));
     spinner.stop();
     console.log('');
-    console.log(asTable(envsData));
+    console.log(asTable.configure({delimiter: ' | '})(envsData));
     console.log('');
   } else {
     spinner.fail('No env defined');
