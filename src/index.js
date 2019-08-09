@@ -238,6 +238,7 @@ function isEnvAvailable(env) {
               return false;
             }
           }).catch(err => {
+            console.error(err);
             return false;
           });
         }

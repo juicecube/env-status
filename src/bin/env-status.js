@@ -50,13 +50,9 @@ if (!config) {
   process.exit();
 }
 
-const envs = (config.envs || []).filter(env => {
-  if (requestEnv) {
-    return typeof env == 'string' && (env == requestEnv || env == 'production');
-  } else {
-    return typeof env == 'string';
-  }
-});
+const envs = (config.envs || []).filter(env =>
+  requestEnv ? typeof env === 'string' && (env === requestEnv || env === 'production') : typeof env === 'string'
+);
 
 if (requestEnv && envs.length < 2) {
   if (!envs.length || envs[0] != requestEnv) {
@@ -71,7 +67,7 @@ const currentVersion = (() => {
 
     return pkgInfo.version;
   } catch (err) {
-    // do nothing
+    console.error(err);
   }
 })();
 
@@ -107,7 +103,7 @@ Promise.all(envs.map(env => envStatus.fetchEnvData(env))).then(async envsData =>
     }));
     spinner.stop();
     console.log('');
-    console.log(asTable(envsData));
+    console.log(asTable.configure({delimiter: ' | '})(envsData));
     console.log('');
   } else {
     spinner.fail('No env defined');
