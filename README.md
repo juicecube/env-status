@@ -61,9 +61,9 @@ A command to show each env status, whether it is using for testing or available 
 
   `npx -p env-status env-status --gen` will generate the json file for publishing.
 
-- **env-status-pre-push-hook**
+- **env-status-version-validate**
 
-  Config this command as your git pre-push hook.
+  Validate whether package version is consistant with version in branch name, config this command as your git hook.
 
 - **arc-diff**
 

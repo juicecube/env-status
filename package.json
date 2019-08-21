@@ -1,6 +1,6 @@
 {
   "name": "env-status",
-  "version": "0.27.5",
+  "version": "0.28.0",
   "description": "A command to show each env status, whether it is using for testing or available for using.",
   "keywords": [
     "env",
@@ -33,7 +33,7 @@
     "arc-diff": "./lib/bin/arc-diff.js",
     "arc-land": "./lib/bin/arc-land.js",
     "env-status": "./lib/bin/env-status.js",
-    "env-status-pre-push-hook": "./lib/bin/env-status-pre-push-hook.js"
+    "env-status-version-validate": "./lib/bin/env-status-version-validate.js"
   },
   "scripts": {
     "build": "babel src -d lib",
@@ -44,7 +44,7 @@
     "hooks": {
       "pre-commit": "npm run eslint && npm run test",
       "post-commit": "./lib/bin/env-status.js --gen",
-      "pre-push": "./lib/bin/env-status-pre-push-hook.js"
+      "pre-push": "./lib/bin/env-status-version-validate.js"
     }
   },
   "dependencies": {
