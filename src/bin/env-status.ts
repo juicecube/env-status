@@ -1,14 +1,15 @@
 #!/usr/bin/env node
+import * as fs from 'fs';
+import * as path from 'path';
+import * as moment from 'moment';
+import * as mkdirp from 'mkdirp';
+import * as chalkModule from 'chalk';
+import * as ora from 'ora';
+import * as asTable from 'as-table';
+import * as envStatus from '../index';
+import {EnvData, isEnvErrDataType} from '../interfaces';
 
-const fs = require('fs'),
-  path = require('path'),
-  Promise = require('bluebird'),
-  mkdirp = require('mkdirp'),
-  moment = require('moment'),
-  chalk = require('chalk'),
-  ora = require('ora'),
-  asTable = require('as-table'),
-  envStatus = require('../index');
+const chalk = chalkModule as any;
 
 const config = envStatus.getConfig();
 const requestEnv = process.argv[2];
@@ -75,14 +76,19 @@ spinner.text = 'Loading envs data';
 
 Promise.all(envs.map(env => envStatus.fetchEnvData(env))).then(async envsData => {
   if (envsData.length) {
-    envsData = envsData.sort((a, b) => {
+    envsData = envsData.sort((a: EnvData, b: EnvData) => {
       return getEnvWeight(a.env) - getEnvWeight(b.env) + (a.date > b.date ? -1 : a.date < b.date ? 1 : 0);
     });
-    envsData = await Promise.all(envsData.map(async data => {
+    const envsData2 = await Promise.all(envsData.map(async data => {
       let status;
-      if (data.err) {
+      if (isEnvErrDataType(data)) {
         status = chalk.red(data.err);
-      } else if (data.env == 'production') {
+        return {
+          env: data.env,
+          status: status
+        };
+      }
+      if (data.env == 'production') {
         status = '';
       } else if (await envStatus.isEnvAvailable(data.env)) {
         status = chalk.green('Available');
@@ -103,7 +109,7 @@ Promise.all(envs.map(env => envStatus.fetchEnvData(env))).then(async envsData =>
     }));
     spinner.stop();
     console.log('');
-    console.log(asTable.configure({delimiter: ' | '})(envsData));
+    console.log(asTable.configure({delimiter: ' | '})(envsData2));
     console.log('');
   } else {
     spinner.fail('No env defined');

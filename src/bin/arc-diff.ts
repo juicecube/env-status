@@ -1,8 +1,10 @@
 #!/usr/bin/env node
-const path = require('path'),
-  chalk = require('chalk'),
-  envStatus = require('../index');
-const {spawnSync} = require('child_process');
+import {spawnSync} from 'child_process';
+import * as path from 'path';
+import * as chalkModule from 'chalk';
+import * as envStatus from '../index';
+
+const chalk = chalkModule as any;
 
 const args = process.argv.slice(2);
 const {BRANCH_TYPES} = envStatus;

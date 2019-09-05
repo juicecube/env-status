@@ -1,9 +1,11 @@
 #!/usr/bin/env node
-const path = require('path'),
-  Promise = require('bluebird'),
-  chalk = require('chalk'),
-  envStatus = require('../index');
-const {spawnSync} = require('child_process');
+import {spawnSync} from 'child_process';
+import * as path from 'path';
+import * as chalkModule from 'chalk';
+import * as envStatus from '../index';
+import {isEnvErrDataType} from '../interfaces';
+
+const chalk = chalkModule as any;
 
 const args = process.argv.slice(2);
 const {BRANCH_TYPES} = envStatus;
@@ -56,13 +58,19 @@ if (branchType == BRANCH_TYPES.ITERATION) {
     const stagingInfo = values[1];
 
     // staging环境是否异常
-    if (stagingInfo.version !== masterVersion || stagingInfo.err) {
+    if (isEnvErrDataType(stagingInfo)) {
+      console.log(chalk.red('Failed to fetch env data!'));
+      process.exit(1);
+    } else if (stagingInfo.version !== masterVersion) {
       console.log(chalk.red('Staging environment should keep same version with master!'));
       process.exit(1);
     }
     envStatus.fetchEnvData('production').then((pInfo) => {
       // production环境是否和master一致并且当前分支版本大于master
-      if (pInfo.version === masterVersion && envStatus.compareVersion(localVersion, masterVersion) === 1) {
+      if (isEnvErrDataType(pInfo)) {
+        console.log(chalk.red('Failed to fetch env data!'));
+        process.exit(1);
+      } else if (pInfo.version === masterVersion && envStatus.compareVersion(localVersion, masterVersion) === 1) {
         createLand('master');
       } else {
         console.log(chalk.red(`The '${branchName}' branch is not viable for arc-land`));
@@ -81,6 +89,12 @@ if (branchType === BRANCH_TYPES.ITERATION_FIX) {
     envStatus.getOriginBranchVersion('master'),
     envStatus.fetchEnvData('production'),
   ]).then((values) => {
+    if (isEnvErrDataType(values[1])) {
+      console.log(chalk.red('Failed to fetch env data!'));
+      process.exit(1);
+      return;
+    }
+
     const masterVersion = values[0];
     const prodVersion = values[1].version;
 

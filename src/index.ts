@@ -1,19 +1,19 @@
-const {execFileSync, execFile} = require('child_process'),
-  os = require('os'),
-  fs = require('fs'),
-  path = require('path'),
-  Promise = require('bluebird'),
-  fetch = require('fetch'),
-  moment = require('moment');
+import {execFileSync, execFile} from 'child_process';
+import * as os from 'os';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as fetch from 'fetch';
+import * as moment from 'moment';
+import {EnvData, EnvErrData, EnvConfig} from './interfaces';
 
-const FETCH_ERR = {
+export const FETCH_ERR = {
   CONFIG_UNDEFINED: 'CONFIG_UNDEFINED',
   URL_FUNCTION_UNDEFINED: 'URL_FUNCTION_UNDEFINED',
   LOAD_ERROR: 'LOAD_ERROR',
   PARSE_RESPONSE_ERROR: 'PARSE_RESPONSE_ERROR'
 };
 
-const BRANCH_TYPES = {
+export const BRANCH_TYPES = {
   ITERATION: 'ITERATION',
   ITERATION_FEATURE: 'ITERATION_FEATURE',
   ITERATION_FIX: 'ITERATION_FIX',
@@ -23,12 +23,12 @@ const BRANCH_TYPES = {
 
 const _envDataCache = {};
 
-let _fetchOriginPromise;
-function _fetchOrigin() {
+let _fetchOriginPromise: Promise<void>;
+function _fetchOrigin(): Promise<void> {
   if (_fetchOriginPromise) {
     return _fetchOriginPromise;
   }
-  return _fetchOriginPromise = new Promise((resolve, reject) => {
+  return _fetchOriginPromise = new Promise((resolve: () => void, reject: Function) => {
     execFile('git', ['fetch', 'origin'], err => {
       if (err) {
         _fetchOriginPromise = null;
@@ -40,8 +40,8 @@ function _fetchOrigin() {
   });
 }
 
-let _config;
-function getConfig() {
+let _config: EnvConfig;
+export function getConfig(): EnvConfig {
   if (_config) {
     return _config;
   }
@@ -53,7 +53,7 @@ function getConfig() {
   return _config;
 }
 
-function _isValidVersion(version, fix) {
+function _isValidVersion(version: string, fix?: boolean) {
   if ((/^\d+\.\d+\.\d+$/).test(version)) {
     const parts = version.split('.');
     if (parts[0] == '0' && parts[1] == '0') {
@@ -72,7 +72,7 @@ function _isValidVersion(version, fix) {
   return false;
 }
 
-function getLastCommit() {
+export function getLastCommit() {
   let jsonStr;
   try {
     jsonStr = execFileSync('git', ['show', '--stat', '--format={"commit": "%h", "author": "%an", "branch": "%d"}|||']).toString().split('|||')[0];
@@ -85,7 +85,7 @@ function getLastCommit() {
   return res;
 }
 
-function getBranchName() {
+export function getBranchName() {
   const res = execFileSync('git', ['branch']).toString().split(os.EOL).find(x => x.startsWith('*'));
   if (res) {
     return res.slice(1).trim();
@@ -94,7 +94,7 @@ function getBranchName() {
   }
 }
 
-function getBranchType(branch) {
+export function getBranchType(branch) {
   if ((/^\d+\.\d+\.\d+$/).test(branch)) {
     if (_isValidVersion(branch)) {
       return BRANCH_TYPES.ITERATION;
@@ -122,7 +122,7 @@ function getBranchType(branch) {
   return BRANCH_TYPES.OTHERS;
 }
 
-function getOriginBranchVersion(branch) {
+export function getOriginBranchVersion(branch) {
   return new Promise((resolve, reject) => {
     execFile('git', ['fetch', 'origin', branch], err => {
       if (err) {
@@ -143,7 +143,7 @@ function getOriginBranchVersion(branch) {
   });
 }
 
-function getVersionFromBranchName(branch) {
+export function getVersionFromBranchName(branch) {
   if (getBranchType(branch) != BRANCH_TYPES.OTHERS) {
     return branch.split('-')[0];
   } else {
@@ -151,7 +151,7 @@ function getVersionFromBranchName(branch) {
   }
 }
 
-function compareVersion(a, b) {
+export function compareVersion(a, b) {
   const r = /^\d+\.\d+\.\d+$/;
   if (!r.test(a) || !r.test(b)) {
     return 9;
@@ -170,8 +170,8 @@ function compareVersion(a, b) {
   return 0;
 }
 
-function fetchEnvData(env) {
-  return new Promise(resolve => {
+export function fetchEnvData(env: string): Promise<EnvData | EnvErrData> {
+  return new Promise((resolve: (res: EnvData | EnvErrData) => void) => {
     if (_envDataCache[env]) {
       resolve(_envDataCache[env]);
       return;
@@ -203,9 +203,9 @@ function fetchEnvData(env) {
   });
 }
 
-function isEnvAvailable(env) {
+export function isEnvAvailable(env) {
   return Promise.all(['production', 'staging', env].map(env => fetchEnvData(env))).then(envsData => {
-    const envData = envsData[2] || {}, stgData = envsData[1] || {}, prdData = envsData[0] || {};
+    const envData: any = envsData[2] || {}, stgData: any = envsData[1] || {}, prdData: any = envsData[0] || {};
     if (!envData.version) {
       return false;
     }
@@ -246,17 +246,3 @@ function isEnvAvailable(env) {
     }
   });
 }
-
-module.exports = {
-  FETCH_ERR: FETCH_ERR,
-  BRANCH_TYPES: BRANCH_TYPES,
-  getConfig: getConfig,
-  getLastCommit: getLastCommit,
-  getBranchName: getBranchName,
-  getBranchType: getBranchType,
-  getOriginBranchVersion: getOriginBranchVersion,
-  getVersionFromBranchName: getVersionFromBranchName,
-  compareVersion: compareVersion,
-  fetchEnvData: fetchEnvData,
-  isEnvAvailable: isEnvAvailable
-};
