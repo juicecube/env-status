@@ -5,11 +5,14 @@
   ],
   "jsRules": {},
   "rules": {
+    "curly": true,
+    "indent": [true, "spaces", 2],
     "no-console": false,
     "no-var-requires": false,
     "object-literal-sort-keys": false,
     "ordered-imports": false,
-    "quotemark": [true, "single", "avoid-escape"]
+    "quotemark": [true, "single", "avoid-escape"],
+    "space-within-parens": [true, 0]
   },
   "rulesDirectory": []
 }
