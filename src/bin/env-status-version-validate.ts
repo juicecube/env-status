@@ -2,11 +2,12 @@
 import * as chalk from 'chalk';
 import * as path from 'path';
 import * as envStatus from '../index';
+import {BRANCH_TYPES} from '../interfaces';
 
 const branch = envStatus.getBranchName();
 const branchType = envStatus.getBranchType(branch);
 
-if (branchType !== envStatus.BRANCH_TYPES.OTHERS) {
+if (branchType !== BRANCH_TYPES.OTHERS) {
   const versionInBranchName = envStatus.getVersionFromBranchName(branch);
   const versionInPkg = require(path.resolve('package.json')).version;
 

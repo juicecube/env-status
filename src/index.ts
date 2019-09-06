@@ -4,22 +4,7 @@ import * as fs from 'fs';
 import * as moment from 'moment';
 import * as os from 'os';
 import * as path from 'path';
-import {IEnvConfig, IEnvData, IEnvErrData} from './interfaces';
-
-export const FETCH_ERR = {
-  CONFIG_UNDEFINED: 'CONFIG_UNDEFINED',
-  URL_FUNCTION_UNDEFINED: 'URL_FUNCTION_UNDEFINED',
-  LOAD_ERROR: 'LOAD_ERROR',
-  PARSE_RESPONSE_ERROR: 'PARSE_RESPONSE_ERROR',
-};
-
-export const BRANCH_TYPES = {
-  ITERATION: 'ITERATION',
-  ITERATION_FEATURE: 'ITERATION_FEATURE',
-  ITERATION_FIX: 'ITERATION_FIX',
-  HOTFIX: 'HOTFIX',
-  OTHERS: 'OTHERS',
-};
+import {FETCH_ERR, BRANCH_TYPES, IEnvConfig, IEnvData, IEnvErrData} from './interfaces';
 
 const envDataCache: {[key: string]: IEnvData} = {};
 
@@ -96,7 +81,7 @@ export function getBranchName() {
   }
 }
 
-export function getBranchType(branch: string) {
+export function getBranchType(branch: string): BRANCH_TYPES {
   if ((/^\d+\.\d+\.\d+$/).test(branch)) {
     if (isValidVersion(branch)) {
       return BRANCH_TYPES.ITERATION;

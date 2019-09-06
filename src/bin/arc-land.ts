@@ -3,10 +3,9 @@ import * as chalk from 'chalk';
 import {spawnSync} from 'child_process';
 import * as path from 'path';
 import * as envStatus from '../index';
-import {IEnvData, isEnvErrDataType} from '../interfaces';
+import {BRANCH_TYPES, IEnvData, isEnvErrDataType} from '../interfaces';
 
 const args = process.argv.slice(2);
-const {BRANCH_TYPES} = envStatus;
 const branchName = envStatus.getBranchName();
 const branchType = envStatus.getBranchType(branchName);
 const branchNameVersion = envStatus.getVersionFromBranchName(branchName);
