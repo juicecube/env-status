@@ -81,7 +81,7 @@ export function getLastCommit() {
   }
   const res = JSON.parse(jsonStr);
   res.date = moment(new Date()).valueOf();
-  res.branch = res.branch.match(/(?<= )\S*(?=\))/)[0];
+  res.branch = res.branch.match(/\S*?(?=\))/)[0];
   return res;
 }
 
