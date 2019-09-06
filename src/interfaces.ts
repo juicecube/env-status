@@ -1,4 +1,4 @@
-export interface EnvData {
+export interface IEnvData {
   env: string;
   version: string;
   branch: string;
@@ -7,17 +7,17 @@ export interface EnvData {
   date: string;
 }
 
-export interface EnvErrData {
+export interface IEnvErrData {
   env: string;
   err: string;
 }
 
-export interface EnvConfig {
-  envs: Array<string>;
+export interface IEnvConfig {
+  envs: string[];
   gen: string;
   url(env: string): string;
 }
 
-export function isEnvErrDataType(type: EnvData | EnvErrData): type is EnvErrData {
-  return (type as EnvErrData).err !== undefined;
+export function isEnvErrDataType(type: IEnvData | IEnvErrData): type is IEnvErrData {
+  return (type as IEnvErrData).err !== undefined;
 }

@@ -1,16 +1,16 @@
-import {execFileSync, execFile} from 'child_process';
-import * as os from 'os';
-import * as fs from 'fs';
-import * as path from 'path';
+import {execFile, execFileSync} from 'child_process';
 import * as fetch from 'fetch';
+import * as fs from 'fs';
 import * as moment from 'moment';
-import {EnvData, EnvErrData, EnvConfig} from './interfaces';
+import * as os from 'os';
+import * as path from 'path';
+import {IEnvConfig, IEnvData, IEnvErrData} from './interfaces';
 
 export const FETCH_ERR = {
   CONFIG_UNDEFINED: 'CONFIG_UNDEFINED',
   URL_FUNCTION_UNDEFINED: 'URL_FUNCTION_UNDEFINED',
   LOAD_ERROR: 'LOAD_ERROR',
-  PARSE_RESPONSE_ERROR: 'PARSE_RESPONSE_ERROR'
+  PARSE_RESPONSE_ERROR: 'PARSE_RESPONSE_ERROR',
 };
 
 export const BRANCH_TYPES = {
@@ -18,20 +18,20 @@ export const BRANCH_TYPES = {
   ITERATION_FEATURE: 'ITERATION_FEATURE',
   ITERATION_FIX: 'ITERATION_FIX',
   HOTFIX: 'HOTFIX',
-  OTHERS: 'OTHERS'
+  OTHERS: 'OTHERS',
 };
 
-const _envDataCache: {[key: string]: EnvData} = {};
+const envDataCache: {[key: string]: IEnvData} = {};
 
-let _fetchOriginPromise: Promise<void>;
+let fetchOriginPromise: Promise<void>;
 function _fetchOrigin(): Promise<void> {
-  if (_fetchOriginPromise) {
-    return _fetchOriginPromise;
+  if (fetchOriginPromise) {
+    return fetchOriginPromise;
   }
-  return _fetchOriginPromise = new Promise((resolve: () => void, reject: Function) => {
-    execFile('git', ['fetch', 'origin'], err => {
+  return fetchOriginPromise = new Promise((resolve: () => void, reject: (err: any) => void) => {
+    execFile('git', ['fetch', 'origin'], (err) => {
       if (err) {
-        _fetchOriginPromise = null;
+        fetchOriginPromise = null;
         reject(err);
       } else {
         resolve();
@@ -40,23 +40,23 @@ function _fetchOrigin(): Promise<void> {
   });
 }
 
-let _config: EnvConfig;
-export function getConfig(): EnvConfig {
-  if (_config) {
-    return _config;
+let envConfig: IEnvConfig;
+export function getConfig(): IEnvConfig {
+  if (envConfig) {
+    return envConfig;
   }
   const configPath = path.resolve('.envstatus.js');
   if (!fs.existsSync(configPath)) {
     return null;
   }
-  _config = require(configPath);
-  return _config;
+  envConfig = require(configPath);
+  return envConfig;
 }
 
-function _isValidVersion(version: string, fix?: boolean) {
+function isValidVersion(version: string, fix?: boolean) {
   if ((/^\d+\.\d+\.\d+$/).test(version)) {
     const parts = version.split('.');
-    if (parts[0] == '0' && parts[1] == '0') {
+    if (parts[0] === '0' && parts[1] === '0') {
       return false;
     }
     for (const x of parts) {
@@ -64,7 +64,7 @@ function _isValidVersion(version: string, fix?: boolean) {
         return false;
       }
     }
-    if (fix && parts[2] == '0' || !fix && parts[2] != '0') {
+    if (fix && parts[2] === '0' || !fix && parts[2] !== '0') {
       return false;
     }
     return true;
@@ -75,7 +75,9 @@ function _isValidVersion(version: string, fix?: boolean) {
 export function getLastCommit() {
   let jsonStr;
   try {
-    jsonStr = execFileSync('git', ['show', '--stat', '--format={"commit": "%h", "author": "%an", "branch": "%d"}|||']).toString().split('|||')[0];
+    jsonStr = execFileSync('git', ['show', '--stat', '--format={"commit": "%h", "author": "%an", "branch": "%d"}|||'])
+      .toString()
+      .split('|||')[0];
   } catch (err) {
     jsonStr = fs.readFileSync('last-commit.txt').toString().split('|||')[0];
   }
@@ -86,7 +88,7 @@ export function getLastCommit() {
 }
 
 export function getBranchName() {
-  const res = execFileSync('git', ['branch']).toString().split(os.EOL).find(x => x.startsWith('*'));
+  const res = execFileSync('git', ['branch']).toString().split(os.EOL).find((x) => x.startsWith('*'));
   if (res) {
     return res.slice(1).trim();
   } else {
@@ -96,14 +98,14 @@ export function getBranchName() {
 
 export function getBranchType(branch: string) {
   if ((/^\d+\.\d+\.\d+$/).test(branch)) {
-    if (_isValidVersion(branch)) {
+    if (isValidVersion(branch)) {
       return BRANCH_TYPES.ITERATION;
     } else {
       return BRANCH_TYPES.OTHERS;
     }
   }
   if ((/^\d+\.\d+\.\d+-feat-.+$/).test(branch)) {
-    if (_isValidVersion(branch.split('-')[0])) {
+    if (isValidVersion(branch.split('-')[0])) {
       return BRANCH_TYPES.ITERATION_FEATURE;
     } else {
       return BRANCH_TYPES.OTHERS;
@@ -111,9 +113,9 @@ export function getBranchType(branch: string) {
   }
   if ((/^\d+\.\d+\.\d+-fix-.+$/).test(branch)) {
     const version = branch.split('-')[0];
-    if (_isValidVersion(version)) {
+    if (isValidVersion(version)) {
       return BRANCH_TYPES.ITERATION_FIX;
-    } else if (_isValidVersion(version, true)) {
+    } else if (isValidVersion(version, true)) {
       return BRANCH_TYPES.HOTFIX;
     } else {
       return BRANCH_TYPES.OTHERS;
@@ -124,7 +126,7 @@ export function getBranchType(branch: string) {
 
 export function getOriginBranchVersion(branch: string) {
   return new Promise((resolve, reject) => {
-    execFile('git', ['fetch', 'origin', branch], err => {
+    execFile('git', ['fetch', 'origin', branch], (err) => {
       if (err) {
         reject(err);
         return;
@@ -144,7 +146,7 @@ export function getOriginBranchVersion(branch: string) {
 }
 
 export function getVersionFromBranchName(branch: string) {
-  if (getBranchType(branch) != BRANCH_TYPES.OTHERS) {
+  if (getBranchType(branch) !== BRANCH_TYPES.OTHERS) {
     return branch.split('-')[0];
   } else {
     return '';
@@ -159,8 +161,8 @@ export function compareVersion(a: string, b: string) {
   const aArr = a.split('.');
   const bArr = b.split('.');
   for (let i = 0, l = aArr.length; i < l; i++) {
-    const ai = parseInt(aArr[i]);
-    const bi = parseInt(bArr[i]);
+    const ai = parseInt(aArr[i], 10);
+    const bi = parseInt(bArr[i], 10);
     if (ai > bi) {
       return 1;
     } else if (ai < bi) {
@@ -170,64 +172,66 @@ export function compareVersion(a: string, b: string) {
   return 0;
 }
 
-export function fetchEnvData(env: string): Promise<EnvData | EnvErrData> {
-  return new Promise((resolve: (res: EnvData | EnvErrData) => void) => {
-    if (_envDataCache[env]) {
-      resolve(_envDataCache[env]);
+export function fetchEnvData(env: string): Promise<IEnvData | IEnvErrData> {
+  return new Promise((resolve: (res: IEnvData | IEnvErrData) => void) => {
+    if (envDataCache[env]) {
+      resolve(envDataCache[env]);
       return;
     }
     const config = getConfig();
     if (!config) {
-      resolve({err: FETCH_ERR.CONFIG_UNDEFINED, env: env});
+      resolve({err: FETCH_ERR.CONFIG_UNDEFINED, env});
       return;
     }
-    if (typeof config.url != 'function') {
-      resolve({err: FETCH_ERR.URL_FUNCTION_UNDEFINED, env: env});
+    if (typeof config.url !== 'function') {
+      resolve({err: FETCH_ERR.URL_FUNCTION_UNDEFINED, env});
       return;
     }
     const url = config.url(env);
     fetch.fetchUrl(`${url}${url.indexOf('?') > 0 ? '&' : '?'}t=${Date.now()}`, (error: any, meta: any, body: any) => {
       let data;
-      if (error || meta.status != 200) {
-        data = {err: FETCH_ERR.LOAD_ERROR, env: env};
+      if (error || meta.status !== 200) {
+        data = {err: FETCH_ERR.LOAD_ERROR, env};
       } else {
         try {
-          data = Object.assign({env: env}, JSON.parse(body.toString()));
+          data = Object.assign({env}, JSON.parse(body.toString()));
         } catch (err) {
-          data = {err: FETCH_ERR.PARSE_RESPONSE_ERROR, env: env};
+          data = {err: FETCH_ERR.PARSE_RESPONSE_ERROR, env};
         }
       }
-      _envDataCache[env] = data;
+      envDataCache[env] = data;
       resolve(data);
     });
   });
 }
 
 export function isEnvAvailable(env: string) {
-  return Promise.all(['production', 'staging', env].map(env => fetchEnvData(env))).then(envsData => {
-    const envData: any = envsData[2] || {}, stgData: any = envsData[1] || {}, prdData: any = envsData[0] || {};
+  return Promise.all(['production', 'staging', env].map((e) => fetchEnvData(e))).then((envsData) => {
+    const envData: any = envsData[2] || {};
+    const stgData: any = envsData[1] || {};
+    const prdData: any = envsData[0] || {};
     if (!envData.version) {
       return false;
     }
-    if (envData.env == 'production') {
+    if (envData.env === 'production') {
       return true;
-    } else if (envData.env == 'staging') {
-      if (compareVersion(envData.version, prdData.version) == 1) {
+    } else if (envData.env === 'staging') {
+      if (compareVersion(envData.version, prdData.version) === 1) {
         return false;
       } else {
         return true;
       }
     } else {
       let compareRes = compareVersion(envData.version, stgData.version);
-      if (compareRes == 1) {
+      if (compareRes === 1) {
         return false;
-      } if (compareRes == 0) {
+      } else if (compareRes === 0) {
         return true;
       } else {
         compareRes = compareVersion(envData.version, prdData.version);
-        if (compareRes == 1) {
+        if (compareRes === 1) {
           return false;
-        } if (compareRes == 0) {
+        } else if (compareRes === 0) {
           return true;
         } else {
           return _fetchOrigin().then(() => {
@@ -237,7 +241,7 @@ export function isEnvAvailable(env: string) {
             } catch (err) {
               return false;
             }
-          }).catch(err => {
+          }).catch((err) => {
             console.error(err);
             return false;
           });

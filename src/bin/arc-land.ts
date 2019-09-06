@@ -1,16 +1,16 @@
 #!/usr/bin/env node
+import * as chalk from 'chalk';
 import {spawnSync} from 'child_process';
 import * as path from 'path';
-import * as chalk from 'chalk';
 import * as envStatus from '../index';
-import {EnvData, isEnvErrDataType} from '../interfaces';
+import {IEnvData, isEnvErrDataType} from '../interfaces';
 
 const args = process.argv.slice(2);
 const {BRANCH_TYPES} = envStatus;
-const branchName = envStatus.getBranchName(),
-  branchType = envStatus.getBranchType(branchName),
-  branchNameVersion = envStatus.getVersionFromBranchName(branchName),
-  localVersion = require(path.resolve('package.json')).version;
+const branchName = envStatus.getBranchName();
+const branchType = envStatus.getBranchType(branchName);
+const branchNameVersion = envStatus.getVersionFromBranchName(branchName);
+const localVersion = require(path.resolve('package.json')).version;
 
 const createLand = (branch: string) => {
   spawnSync('arc', ['land', '--onto', branch, ...args], {stdio: 'inherit'});
@@ -47,7 +47,7 @@ if (branchType === BRANCH_TYPES.ITERATION_FEATURE) {
 }
 
 // 当前分支为迭代公共分支
-if (branchType == BRANCH_TYPES.ITERATION) {
+if (branchType === BRANCH_TYPES.ITERATION) {
   Promise.all([
     envStatus.getOriginBranchVersion('master'),
     envStatus.fetchEnvData('staging'),
@@ -86,7 +86,7 @@ if (branchType === BRANCH_TYPES.ITERATION_FIX) {
   Promise.all([
     envStatus.getOriginBranchVersion('master'),
     envStatus.fetchEnvData('production'),
-  ]).then((values: [string, EnvData]) => {
+  ]).then((values: [string, IEnvData]) => {
     if (isEnvErrDataType(values[1])) {
       console.log(chalk.red('Failed to fetch env data!'));
       process.exit(1);
@@ -106,6 +106,6 @@ if (branchType === BRANCH_TYPES.ITERATION_FIX) {
 }
 
 // 当前分支为hotfix分支
-if (branchType == BRANCH_TYPES.HOTFIX) {
+if (branchType === BRANCH_TYPES.HOTFIX) {
   landLocalBranch('master', 1);
 }

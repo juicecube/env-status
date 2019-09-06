@@ -1,15 +1,15 @@
 #!/usr/bin/env node
+import * as chalk from 'chalk';
 import {spawnSync} from 'child_process';
 import * as path from 'path';
-import * as chalk from 'chalk';
 import * as envStatus from '../index';
 
 const args = process.argv.slice(2);
 const {BRANCH_TYPES} = envStatus;
-const branchName = envStatus.getBranchName(),
-  branchType = envStatus.getBranchType(branchName),
-  branchNameVersion = envStatus.getVersionFromBranchName(branchName),
-  localVersion = require(path.resolve('package.json')).version;
+const branchName = envStatus.getBranchName();
+const branchType = envStatus.getBranchType(branchName);
+const branchNameVersion = envStatus.getVersionFromBranchName(branchName);
+const localVersion = require(path.resolve('package.json')).version;
 
 const createDiff = (branch: string) => {
   spawnSync('arc', ['diff', `origin/${branch}`, ...args], {stdio: 'inherit'});
@@ -47,6 +47,6 @@ if (branchType === BRANCH_TYPES.ITERATION_FIX) {
 }
 
 // 当前分支为hotfix分支或者公共的迭代分支，判断版本是否大于master
-if (branchType == BRANCH_TYPES.HOTFIX || branchType == BRANCH_TYPES.ITERATION) {
+if (branchType === BRANCH_TYPES.HOTFIX || branchType === BRANCH_TYPES.ITERATION) {
   handleBranch('master', 1);
 }
