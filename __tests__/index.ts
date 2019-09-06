@@ -1,5 +1,5 @@
-const envStatus = require('../lib/index');
-const {BRANCH_TYPES} = require('../lib/interfaces');
+import * as envStatus from '../src/index';
+import {BRANCH_TYPES} from '../src/interfaces';
 
 test('getConfig', () => {
   expect(envStatus.getConfig().gen).toEqual('dist/env-status.json');
