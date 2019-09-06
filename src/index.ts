@@ -21,7 +21,7 @@ export const BRANCH_TYPES = {
   OTHERS: 'OTHERS'
 };
 
-const _envDataCache = {};
+const _envDataCache: {[key: string]: EnvData} = {};
 
 let _fetchOriginPromise: Promise<void>;
 function _fetchOrigin(): Promise<void> {
@@ -94,7 +94,7 @@ export function getBranchName() {
   }
 }
 
-export function getBranchType(branch) {
+export function getBranchType(branch: string) {
   if ((/^\d+\.\d+\.\d+$/).test(branch)) {
     if (_isValidVersion(branch)) {
       return BRANCH_TYPES.ITERATION;
@@ -122,7 +122,7 @@ export function getBranchType(branch) {
   return BRANCH_TYPES.OTHERS;
 }
 
-export function getOriginBranchVersion(branch) {
+export function getOriginBranchVersion(branch: string) {
   return new Promise((resolve, reject) => {
     execFile('git', ['fetch', 'origin', branch], err => {
       if (err) {
@@ -143,7 +143,7 @@ export function getOriginBranchVersion(branch) {
   });
 }
 
-export function getVersionFromBranchName(branch) {
+export function getVersionFromBranchName(branch: string) {
   if (getBranchType(branch) != BRANCH_TYPES.OTHERS) {
     return branch.split('-')[0];
   } else {
@@ -151,16 +151,16 @@ export function getVersionFromBranchName(branch) {
   }
 }
 
-export function compareVersion(a, b) {
+export function compareVersion(a: string, b: string) {
   const r = /^\d+\.\d+\.\d+$/;
   if (!r.test(a) || !r.test(b)) {
     return 9;
   }
-  a = a.split('.');
-  b = b.split('.');
-  for (let i = 0, l = a.length; i < l; i++) {
-    const ai = parseInt(a[i]);
-    const bi = parseInt(b[i]);
+  const aArr = a.split('.');
+  const bArr = b.split('.');
+  for (let i = 0, l = aArr.length; i < l; i++) {
+    const ai = parseInt(aArr[i]);
+    const bi = parseInt(bArr[i]);
     if (ai > bi) {
       return 1;
     } else if (ai < bi) {
@@ -186,7 +186,7 @@ export function fetchEnvData(env: string): Promise<EnvData | EnvErrData> {
       return;
     }
     const url = config.url(env);
-    fetch.fetchUrl(`${url}${url.indexOf('?') > 0 ? '&' : '?'}t=${Date.now()}`, (error, meta, body) => {
+    fetch.fetchUrl(`${url}${url.indexOf('?') > 0 ? '&' : '?'}t=${Date.now()}`, (error: any, meta: any, body: any) => {
       let data;
       if (error || meta.status != 200) {
         data = {err: FETCH_ERR.LOAD_ERROR, env: env};
@@ -203,7 +203,7 @@ export function fetchEnvData(env: string): Promise<EnvData | EnvErrData> {
   });
 }
 
-export function isEnvAvailable(env) {
+export function isEnvAvailable(env: string) {
   return Promise.all(['production', 'staging', env].map(env => fetchEnvData(env))).then(envsData => {
     const envData: any = envsData[2] || {}, stgData: any = envsData[1] || {}, prdData: any = envsData[0] || {};
     if (!envData.version) {

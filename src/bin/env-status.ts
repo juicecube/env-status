@@ -3,13 +3,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as moment from 'moment';
 import * as mkdirp from 'mkdirp';
-import * as chalkModule from 'chalk';
+import * as chalk from 'chalk';
 import * as ora from 'ora';
 import * as asTable from 'as-table';
 import * as envStatus from '../index';
 import {EnvData, isEnvErrDataType} from '../interfaces';
-
-const chalk = chalkModule as any;
 
 const config = envStatus.getConfig();
 const requestEnv = process.argv[2];
@@ -120,7 +118,7 @@ Promise.all(envs.map(env => envStatus.fetchEnvData(env))).then(async envsData =>
     console.error(err);
   });
 
-function getEnvWeight(env) {
+function getEnvWeight(env: string) {
   if (env == 'production') {
     return 10;
   } else if (env == 'staging') {

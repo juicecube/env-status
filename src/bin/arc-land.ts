@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 import {spawnSync} from 'child_process';
 import * as path from 'path';
-import * as chalkModule from 'chalk';
+import * as chalk from 'chalk';
 import * as envStatus from '../index';
-import {isEnvErrDataType} from '../interfaces';
-
-const chalk = chalkModule as any;
+import {EnvData, isEnvErrDataType} from '../interfaces';
 
 const args = process.argv.slice(2);
 const {BRANCH_TYPES} = envStatus;
@@ -14,16 +12,16 @@ const branchName = envStatus.getBranchName(),
   branchNameVersion = envStatus.getVersionFromBranchName(branchName),
   localVersion = require(path.resolve('package.json')).version;
 
-const createLand = (branch) => {
+const createLand = (branch: string) => {
   spawnSync('arc', ['land', '--onto', branch, ...args], {stdio: 'inherit'});
 };
 
-const landLocalBranch = (branch, result = 0) => {
+const landLocalBranch = (branch: string, result = 0) => {
   if (localVersion !== branchNameVersion) {
     console.log(chalk.red(`The '${branchName}' branch has a wrong version or a wrong name.`));
     process.exit(1);
   }
-  envStatus.getOriginBranchVersion(branch).then((version) => {
+  envStatus.getOriginBranchVersion(branch).then((version: string) => {
     if (envStatus.compareVersion(localVersion, version) === result) {
       createLand(branch);
       if (branch === 'master') {
@@ -88,7 +86,7 @@ if (branchType === BRANCH_TYPES.ITERATION_FIX) {
   Promise.all([
     envStatus.getOriginBranchVersion('master'),
     envStatus.fetchEnvData('production'),
-  ]).then((values) => {
+  ]).then((values: [string, EnvData]) => {
     if (isEnvErrDataType(values[1])) {
       console.log(chalk.red('Failed to fetch env data!'));
       process.exit(1);

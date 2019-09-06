@@ -1,10 +1,8 @@
 #!/usr/bin/env node
 import {spawnSync} from 'child_process';
 import * as path from 'path';
-import * as chalkModule from 'chalk';
+import * as chalk from 'chalk';
 import * as envStatus from '../index';
-
-const chalk = chalkModule as any;
 
 const args = process.argv.slice(2);
 const {BRANCH_TYPES} = envStatus;
@@ -13,16 +11,16 @@ const branchName = envStatus.getBranchName(),
   branchNameVersion = envStatus.getVersionFromBranchName(branchName),
   localVersion = require(path.resolve('package.json')).version;
 
-const createDiff = (branch) => {
+const createDiff = (branch: string) => {
   spawnSync('arc', ['diff', `origin/${branch}`, ...args], {stdio: 'inherit'});
 };
 
-const handleBranch = (branch, result = 0) => {
+const handleBranch = (branch: string, result = 0) => {
   if (localVersion !== branchNameVersion) {
     console.log(chalk.red(`The '${branchName}' branch has a wrong version or a wrong name.`));
     process.exit(1);
   }
-  envStatus.getOriginBranchVersion(branch).then((version) => {
+  envStatus.getOriginBranchVersion(branch).then((version: string) => {
     if (envStatus.compareVersion(localVersion, version) === result) {
       createDiff(branch);
       process.exit(0);
