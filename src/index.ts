@@ -24,7 +24,7 @@ export const BRANCH_TYPES = {
 const envDataCache: {[key: string]: IEnvData} = {};
 
 let fetchOriginPromise: Promise<void>;
-function _fetchOrigin(): Promise<void> {
+function fetchOrigin(): Promise<void> {
   if (fetchOriginPromise) {
     return fetchOriginPromise;
   }
@@ -234,7 +234,7 @@ export function isEnvAvailable(env: string) {
         } else if (compareRes === 0) {
           return true;
         } else {
-          return _fetchOrigin().then(() => {
+          return fetchOrigin().then(() => {
             try {
               execFileSync('git', ['merge-base', '--is-ancestor', envData.commit, prdData.commit]);
               return true;
