@@ -5,13 +5,13 @@
 /envs/
 /img/
 /src/
-.babelrc
+/types/
 .editorconfig
-.eslintignore
-.eslintrc.json
 .gitignore
 .npmignore
 jest.config.js
 last-commit.sh
 last-commit.txt
+tsconfig.json
+tslint.json
 yarn.lock
