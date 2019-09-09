@@ -6,6 +6,7 @@
 /img/
 /src/
 /types/
+/lib/__tests__/
 .editorconfig
 .gitignore
 .npmignore
