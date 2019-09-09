@@ -1,5 +1,7 @@
-import * as envStatus from '../index';
+import {EnvStatus} from '../index';
 import {BRANCH_TYPES} from '../interfaces';
+
+const envStatus = EnvStatus.getShared();
 
 test('getConfig', () => {
   expect(envStatus.getConfig().gen).toEqual('dist/env-status.json');
