@@ -20,7 +20,7 @@ export class EnvStatus {
     return this.envConfig = config;
   }
 
-  public getConfig(): IEnvConfig {
+  public getConfig(): IEnvConfig | null {
     if (this.envConfig) {
       return this.envConfig;
     }
@@ -122,7 +122,7 @@ export class EnvStatus {
     return BRANCH_TYPES.OTHERS;
   }
 
-  public getOriginBranchVersion(branch: string) {
+  public getOriginBranchVersion(branch: string): Promise<string> {
     return new Promise((resolve, reject) => {
       child_process.execFile('git', ['fetch', 'origin', branch], (err) => {
         if (err) {
@@ -170,6 +170,10 @@ export class EnvStatus {
     return 0;
   }
 
+  public setEnvDataCache(env: string, data: IEnvData) {
+    this.envDataCache[env] = data;
+  }
+
   public fetchEnvData(env: string): Promise<IEnvData | IEnvErrData> {
     return new Promise((resolve: (res: IEnvData | IEnvErrData) => void) => {
       if (this.envDataCache[env]) {
@@ -197,13 +201,13 @@ export class EnvStatus {
             data = {err: FETCH_ERR.PARSE_RESPONSE_ERROR, env};
           }
         }
-        this.envDataCache[env] = data;
+        this.setEnvDataCache(env, data);
         resolve(data);
       });
     });
   }
 
-  public isEnvAvailable(env: string) {
+  public isEnvAvailable(env: string): Promise<boolean> {
     return Promise.all(['production', 'staging', env].map((e) => this.fetchEnvData(e))).then((envsData) => {
       const envData: any = envsData[2] || {};
       const stgData: any = envsData[1] || {};
