@@ -84,6 +84,67 @@ describe('fetchOrigin', () => {
   });
 });
 
+describe('isValidVersion', () => {
+  test('1.0.0 is valid', () => {
+    expect(envStatus.isValidVersion('1.0.0')).toBeTruthy();
+  });
+
+  test('0.1.0 is valid', () => {
+    expect(envStatus.isValidVersion('0.1.0')).toBeTruthy();
+  });
+
+  test('0.1.1 with fix param is valid', () => {
+    expect(envStatus.isValidVersion('0.1.1', true)).toBeTruthy();
+  });
+
+  test('0.0.1 is not valid', () => {
+    expect(envStatus.isValidVersion('0.0.1')).toBeFalsy();
+  });
+
+  test('0.0.0 is not valid', () => {
+    expect(envStatus.isValidVersion('0.0.0')).toBeFalsy();
+  });
+
+  test('01.0.0 is not valid', () => {
+    expect(envStatus.isValidVersion('01.0.0')).toBeFalsy();
+  });
+
+  test('0.01.0 is not valid', () => {
+    expect(envStatus.isValidVersion('0.01.0')).toBeFalsy();
+  });
+
+  test('1.0.01 is not valid', () => {
+    expect(envStatus.isValidVersion('1.0.01')).toBeFalsy();
+  });
+
+  test('1.0.1 without fix param is not valid', () => {
+    expect(envStatus.isValidVersion('1.0.1')).toBeFalsy();
+  });
+
+  test('1.0.0 with fix param is not valid', () => {
+    expect(envStatus.isValidVersion('1.0.0', true)).toBeFalsy();
+  });
+
+  test('1.0.0.0 is not valid', () => {
+    expect(envStatus.isValidVersion('1.0.0.0')).toBeFalsy();
+  });
+});
+
+describe('getLastCommit', () => {
+  test('success', () => {
+    const spy = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
+      expect(args[0]).toEqual('git');
+      expect(args[1]).toEqual(['show', '--stat', '--format={"commit": "%h", "author": "%an", "branch": "%d"}|||']);
+      return Buffer.from('{"commit": "282d4e2", "author": "webyom", "branch": " (HEAD -> master, 1.0.0)"}|||');
+    });
+    const now = new Date();
+    const res = envStatus.getLastCommit(now);
+    expect(res.branch).toEqual('1.0.0');
+    expect(res.date).toEqual(now.getTime());
+    spy.mockRestore();
+  });
+});
+
 describe('getBranchType', () => {
   test('1.0.0 is ITERATION', () => {
     expect(envStatus.getBranchType('1.0.0')).toEqual(BRANCH_TYPES.ITERATION);

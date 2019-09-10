@@ -38,7 +38,7 @@ export function run() {
   if (requestEnv === '--gen') {
     const pkgInfo = require(path.resolve('package.json'));
 
-    const data = envStatus.getLastCommit();
+    const data = envStatus.getLastCommit(new Date());
     data.version = pkgInfo.version;
 
     const outputPath = path.resolve(config && config.gen || 'dist/env-status.json');

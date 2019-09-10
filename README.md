@@ -75,7 +75,7 @@ A command to show each env status, whether it is using for testing or available 
 
 ## API
 
-- **getLastCommit(): object**
+- **getLastCommit(now: Date): object**
 
   Return the last commit information of current branch as below.
   ```javascript

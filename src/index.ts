@@ -1,7 +1,6 @@
 import * as child_process from 'child_process';
 import * as fetch from 'fetch';
 import * as fs from 'fs';
-import * as moment from 'moment';
 import * as os from 'os';
 import * as path from 'path';
 import {FETCH_ERR, BRANCH_TYPES, IEnvConfig, IEnvData, IEnvErrData} from './interfaces';
@@ -71,7 +70,7 @@ export class EnvStatus {
     return false;
   }
 
-  public getLastCommit() {
+  public getLastCommit(now: Date) {
     let jsonStr;
     try {
       jsonStr = child_process.execFileSync('git', ['show', '--stat', '--format={"commit": "%h", "author": "%an", "branch": "%d"}|||'])
@@ -81,7 +80,7 @@ export class EnvStatus {
       jsonStr = fs.readFileSync('last-commit.txt').toString().split('|||')[0];
     }
     const res = JSON.parse(jsonStr);
-    res.date = moment(new Date()).valueOf();
+    res.date = now.getTime();
     res.branch = res.branch.match(/\S*?(?=\))/)[0];
     return res;
   }
