@@ -39,7 +39,7 @@
     "build": "tsc",
     "lint": "tslint --project tsconfig.json",
     "lint-fix": "tslint --fix --project tsconfig.json",
-    "test": "jest"
+    "test": "jest --detectOpenHandles"
   },
   "husky": {
     "hooks": {

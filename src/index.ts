@@ -1,4 +1,4 @@
-import {execFile, execFileSync} from 'child_process';
+import * as child_process from 'child_process';
 import * as fetch from 'fetch';
 import * as fs from 'fs';
 import * as moment from 'moment';
@@ -17,6 +17,10 @@ export class EnvStatus {
   private fetchOriginPromise: Promise<void>;
   private envConfig: IEnvConfig;
 
+  public setConfig(config: IEnvConfig): IEnvConfig {
+    return this.envConfig = config;
+  }
+
   public getConfig(): IEnvConfig {
     if (this.envConfig) {
       return this.envConfig;
@@ -25,8 +29,7 @@ export class EnvStatus {
     if (!fs.existsSync(configPath)) {
       return null;
     }
-    this.envConfig = require(configPath);
-    return this.envConfig;
+    return this.setConfig(require(configPath));
   }
 
   public getArgs(argv: string[]): string[] {
@@ -38,7 +41,7 @@ export class EnvStatus {
       return this.fetchOriginPromise;
     }
     return this.fetchOriginPromise = new Promise((resolve: () => void, reject: (err: any) => void) => {
-      execFile('git', ['fetch', 'origin'], (err) => {
+      child_process.execFile('git', ['fetch', 'origin'], (err) => {
         if (err) {
           this.fetchOriginPromise = null;
           reject(err);
@@ -71,7 +74,7 @@ export class EnvStatus {
   public getLastCommit() {
     let jsonStr;
     try {
-      jsonStr = execFileSync('git', ['show', '--stat', '--format={"commit": "%h", "author": "%an", "branch": "%d"}|||'])
+      jsonStr = child_process.execFileSync('git', ['show', '--stat', '--format={"commit": "%h", "author": "%an", "branch": "%d"}|||'])
         .toString()
         .split('|||')[0];
     } catch (err) {
@@ -84,7 +87,7 @@ export class EnvStatus {
   }
 
   public getBranchName() {
-    const res = execFileSync('git', ['branch']).toString().split(os.EOL).find((x) => x.startsWith('*'));
+    const res = child_process.execFileSync('git', ['branch']).toString().split(os.EOL).find((x) => x.startsWith('*'));
     if (res) {
       return res.slice(1).trim();
     } else {
@@ -122,13 +125,13 @@ export class EnvStatus {
 
   public getOriginBranchVersion(branch: string) {
     return new Promise((resolve, reject) => {
-      execFile('git', ['fetch', 'origin', branch], (err) => {
+      child_process.execFile('git', ['fetch', 'origin', branch], (err) => {
         if (err) {
           reject(err);
           return;
         }
         try {
-          const m = execFileSync('git', ['diff', `origin/${branch}`, 'package.json']).toString().match(/-\s*"version":\s*"(.*?)"/);
+          const m = child_process.execFileSync('git', ['diff', `origin/${branch}`, 'package.json']).toString().match(/-\s*"version":\s*"(.*?)"/);
           if (m) {
             resolve(m[1]);
           } else {
@@ -232,7 +235,7 @@ export class EnvStatus {
           } else {
             return this.fetchOrigin().then(() => {
               try {
-                execFileSync('git', ['merge-base', '--is-ancestor', envData.commit, prdData.commit]);
+                child_process.execFileSync('git', ['merge-base', '--is-ancestor', envData.commit, prdData.commit]);
                 return true;
               } catch (err) {
                 return false;
