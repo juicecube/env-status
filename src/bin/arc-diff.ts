@@ -1,4 +1,5 @@
 #!/usr/bin/env node
-import {run} from '../arc-diff';
+import {EnvStatus} from '../index';
+import {Runner} from '../arc-diff';
 
-run();
+new Runner(new EnvStatus()).run();

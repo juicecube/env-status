@@ -122,6 +122,10 @@ export class EnvStatus {
     return BRANCH_TYPES.OTHERS;
   }
 
+  public getVersionFromPackage(): string {
+    return require(path.resolve('package.json')).version;
+  }
+
   public getOriginBranchVersion(branch: string): Promise<string> {
     return new Promise((resolve, reject) => {
       child_process.execFile('git', ['fetch', 'origin', branch], (err) => {
@@ -134,7 +138,7 @@ export class EnvStatus {
           if (m) {
             resolve(m[1]);
           } else {
-            resolve(require(path.resolve('package.json')).version);
+            resolve(this.getVersionFromPackage());
           }
         } catch (err) {
           reject(err);

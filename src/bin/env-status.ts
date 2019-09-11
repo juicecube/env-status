@@ -1,4 +1,5 @@
 #!/usr/bin/env node
-import {run} from '../env-status';
+import {EnvStatus} from '../index';
+import {Runner} from '../env-status';
 
-run();
+new Runner(new EnvStatus()).run();

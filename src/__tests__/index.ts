@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as fetch from 'fetch';
 import {EnvStatus} from '../index';
-import {FETCH_ERR, BRANCH_TYPES, IEnvData, IEnvErrData, IEnvConfig} from '../interfaces';
+import {FETCH_ERR, BRANCH_TYPES, IEnvData, IEnvErrData} from '../interfaces';
 
 let envStatus: EnvStatus;
 

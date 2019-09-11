@@ -1,4 +1,5 @@
 #!/usr/bin/env node
-import {run} from '../arc-land';
+import {EnvStatus} from '../index';
+import {Runner} from '../arc-land';
 
-run();
+new Runner(new EnvStatus()).run();
