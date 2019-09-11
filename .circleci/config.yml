@@ -43,4 +43,4 @@ jobs:
       - run: yarn test
 
       # upload codecov!
-      - run: npx codecov
+      - run: yarn codecov
