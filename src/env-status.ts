@@ -12,6 +12,7 @@ export class Runner {
   public static MESSAGES = {
     CONFIG_ALLREADY_EXIST: chalk.yellow('.envstatus.js file already exists!'),
     CONFIG_FILE_CREATED: chalk.green('.envstatus.js file created!'),
+    COMMIT_LOG_GENERATED: chalk.green('Commit log generated!'),
     SPINNER_START: 'Loading .envstatus.js',
     SPINNER_FAIL_NO_CONFIG: `${chalk.yellow('.envstatus.js')} file is missing!`,
     SPINNER_FAIL_REQUESTED_ENV_UNDEFINED: `Requested env undefined!`,
@@ -20,7 +21,7 @@ export class Runner {
 
   constructor(private envStatus: EnvStatus, private spinner: ora.Ora) {}
 
-  public run() {
+  public run(): Promise<string> {
     const config = this.envStatus.getConfig();
     const args = this.envStatus.getArgs(process.argv);
     const requestEnv = args[0];
@@ -28,12 +29,13 @@ export class Runner {
     if (requestEnv === '--init') {
       if (config) {
         console.log(Runner.MESSAGES.CONFIG_ALLREADY_EXIST);
+        return Promise.resolve(Runner.MESSAGES.CONFIG_ALLREADY_EXIST);
       } else {
         const configPath = path.resolve(__dirname, '../.envstatus.js');
         fs.writeFileSync(path.resolve('.envstatus.js'), fs.readFileSync(configPath));
         console.log(Runner.MESSAGES.CONFIG_FILE_CREATED);
+        return Promise.resolve(Runner.MESSAGES.CONFIG_FILE_CREATED);
       }
-      return;
     }
 
     if (requestEnv === '--gen') {
@@ -43,12 +45,14 @@ export class Runner {
       const outputPath = path.resolve(config && config.gen || 'dist/env-status.json');
       mkdirp.sync(path.dirname(outputPath));
       fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
-      return;
+      console.log(Runner.MESSAGES.COMMIT_LOG_GENERATED);
+      return Promise.resolve(Runner.MESSAGES.COMMIT_LOG_GENERATED);
     }
 
     if (requestEnv === '--version') {
-      console.log(this.getPackageVersion());
-      return;
+      const version = this.getPackageVersion();
+      console.log(version);
+      return Promise.resolve(version);
     }
 
     const spinner = this.spinner;
@@ -56,23 +60,21 @@ export class Runner {
 
     if (!config) {
       spinner.fail(Runner.MESSAGES.SPINNER_FAIL_NO_CONFIG);
-      return;
+      return Promise.resolve(Runner.MESSAGES.SPINNER_FAIL_NO_CONFIG);
     }
 
-    const envs = this.getEnvListInTable(config.envs || [], requestEnv);
+    const envs = this.getEnvListForPrint(config.envs, requestEnv);
 
     if (requestEnv && envs.length < 2) {
-      if (!envs.length || envs[0] !== requestEnv) {
-        spinner.fail(Runner.MESSAGES.SPINNER_FAIL_REQUESTED_ENV_UNDEFINED);
-        return;
-      }
+      spinner.fail(Runner.MESSAGES.SPINNER_FAIL_REQUESTED_ENV_UNDEFINED);
+      return Promise.resolve(Runner.MESSAGES.SPINNER_FAIL_REQUESTED_ENV_UNDEFINED);
     }
 
     const currentVersion = this.envStatus.getVersionFromPackage();
 
     spinner.text = Runner.MESSAGES.SPINNER_LOADING_ENV_DATA;
 
-    Promise.all(envs.map((env) => this.envStatus.fetchEnvData(env))).then(async (envsData) => {
+    return Promise.all(envs.map((env) => this.envStatus.fetchEnvData(env))).then(async (envsData) => {
       envsData = envsData.sort((a: IEnvData, b: IEnvData) => {
         return this.getEnvWeight(a.env) - this.getEnvWeight(b.env) + (a.date > b.date ? -1 : a.date < b.date ? 1 : 0);
       });
@@ -105,14 +107,15 @@ export class Runner {
         return res;
       }));
       spinner.stop();
-      console.log('');
-      console.log(asTable.configure({delimiter: ' | '})(envsData2));
-      console.log('');
-    })
-      .catch((err) => {
-        spinner.stop();
-        console.error(err);
-      });
+      this.printTable(envsData2);
+      return Promise.resolve('');
+    });
+  }
+
+  private printTable(envsData: any) {
+    console.log('');
+    console.log(asTable.configure({delimiter: ' | '})(envsData));
+    console.log('');
   }
 
   private getEnvWeight(env: string) {
@@ -129,7 +132,7 @@ export class Runner {
     return require(path.resolve(__dirname, '../package.json')).version;
   }
 
-  private getEnvListInTable(envs: string[], requestEnv?: string): string[] {
+  private getEnvListForPrint(envs: string[], requestEnv?: string): string[] {
     return (envs).filter((env) =>
       requestEnv ? (env === requestEnv || env === 'production') : true,
     );

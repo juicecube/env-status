@@ -1,11 +1,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as ora from 'ora';
-import {mockProcessExit} from 'jest-mock-process';
 import mockConsole from 'jest-mock-console';
 import {EnvStatus} from '../index';
 import {Runner} from '../env-status';
-import {mockSpinner} from './util';
+import {FETCH_ERR} from '../interfaces';
+import {mockSpinner, mockEnvData} from './util';
 
 let envStatus: EnvStatus;
 let spinner: ora.Ora;
@@ -29,10 +29,11 @@ describe('run', () => {
       return ['--init'];
     });
     const consoleRestore = mockConsole();
-    runner.run();
-    expect(console.log).toBeCalledWith(Runner.MESSAGES.CONFIG_ALLREADY_EXIST);
-    consoleRestore();
-    spy.mockRestore();
+    return runner.run().then((msg: string) => {
+      expect(msg).toBe(Runner.MESSAGES.CONFIG_ALLREADY_EXIST);
+      consoleRestore();
+      spy.mockRestore();
+    });
   });
 
   test('--init config file created', () => {
@@ -43,11 +44,12 @@ describe('run', () => {
       return null;
     });
     const consoleRestore = mockConsole();
-    runner.run();
-    expect(console.log).toBeCalledWith(Runner.MESSAGES.CONFIG_FILE_CREATED);
-    consoleRestore();
-    spy2.mockRestore();
-    spy.mockRestore();
+    return runner.run().then((msg: string) => {
+      expect(msg).toBe(Runner.MESSAGES.CONFIG_FILE_CREATED);
+      consoleRestore();
+      spy2.mockRestore();
+      spy.mockRestore();
+    });
   });
 
   test('--gen success', () => {
@@ -55,11 +57,29 @@ describe('run', () => {
       return ['--gen'];
     });
     const spy2 = jest.spyOn(fs, 'writeFileSync');
-    runner.run();
-    const fp = path.resolve('dist/env-status.json');
-    expect(fs.writeFileSync).toBeCalledWith(fp, fs.readFileSync(fp).toString());
-    spy2.mockRestore();
-    spy.mockRestore();
+    const consoleRestore = mockConsole();
+    return runner.run().then((msg: string) => {
+      expect(msg).toBe(Runner.MESSAGES.COMMIT_LOG_GENERATED);
+      consoleRestore();
+      spy2.mockRestore();
+      spy.mockRestore();
+    });
+  });
+
+  test('--gen without config success', () => {
+    const spy = jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
+      return ['--gen'];
+    });
+    const spy2 = jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
+      return null;
+    });
+    const consoleRestore = mockConsole();
+    return runner.run().then((msg: string) => {
+      expect(msg).toBe(Runner.MESSAGES.COMMIT_LOG_GENERATED);
+      consoleRestore();
+      spy2.mockRestore();
+      spy.mockRestore();
+    });
   });
 
   test('--version success', () => {
@@ -67,10 +87,11 @@ describe('run', () => {
       return ['--version'];
     });
     const consoleRestore = mockConsole();
-    runner.run();
-    expect(console.log).toBeCalledWith(require(path.resolve(__dirname, '../../package.json')).version);
-    consoleRestore();
-    spy.mockRestore();
+    return runner.run().then((msg: string) => {
+      expect(msg).toBe(require(path.resolve(__dirname, '../../package.json')).version);
+      consoleRestore();
+      spy.mockRestore();
+    });
   });
 
   test('spinner fail with no config', () => {
@@ -78,10 +99,11 @@ describe('run', () => {
       return null;
     });
     const spinnerRestore = mockSpinner(spinner);
-    runner.run();
-    expect(spinner.fail).toBeCalledWith(Runner.MESSAGES.SPINNER_FAIL_NO_CONFIG);
-    spinnerRestore();
-    spy.mockRestore();
+    return runner.run().then((msg: string) => {
+      expect(msg).toBe(Runner.MESSAGES.SPINNER_FAIL_NO_CONFIG);
+      spinnerRestore();
+      spy.mockRestore();
+    });
   });
 
   test('spinner fail no evn defined', () => {
@@ -93,11 +115,12 @@ describe('run', () => {
       return res;
     });
     const spinnerRestore = mockSpinner(spinner);
-    runner.run();
-    expect(spinner.fail).toBeCalledWith(Runner.MESSAGES.SPINNER_FAIL_REQUESTED_ENV_UNDEFINED);
-    spinnerRestore();
-    spy2.mockRestore();
-    spy.mockRestore();
+    return runner.run().then((msg: string) => {
+      expect(msg).toBe(Runner.MESSAGES.SPINNER_FAIL_REQUESTED_ENV_UNDEFINED);
+      spinnerRestore();
+      spy2.mockRestore();
+      spy.mockRestore();
+    });
   });
 
   test('spinner fail requested env undefined', () => {
@@ -109,17 +132,43 @@ describe('run', () => {
       return res;
     });
     const spinnerRestore = mockSpinner(spinner);
-    runner.run();
-    expect(spinner.fail).toBeCalledWith(Runner.MESSAGES.SPINNER_FAIL_REQUESTED_ENV_UNDEFINED);
-    spinnerRestore();
-    spy2.mockRestore();
-    spy.mockRestore();
+    return runner.run().then((msg: string) => {
+      expect(msg).toBe(Runner.MESSAGES.SPINNER_FAIL_REQUESTED_ENV_UNDEFINED);
+      spinnerRestore();
+      spy2.mockRestore();
+      spy.mockRestore();
+    });
   });
 
-  test('spinner start', () => {
+  test('success', () => {
+    const spy = jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
+      return [];
+    });
+    const spy2 = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env: string) => {
+      if (env === 'production') {
+        return Promise.resolve(mockEnvData({env, version: '1.0.0', date: 10}));
+      } else if (env === 'staging') {
+        return Promise.resolve(mockEnvData({env, version: '1.0.0', date: 5}));
+      } else if (env === 'dev') {
+        return Promise.resolve(mockEnvData({env, version: '1.1.0', date: 7}));
+      } else if (env === 'dev1') {
+        return Promise.resolve(mockEnvData({env, version: '1.2.0', date: 7}));
+      } else {
+        return Promise.resolve({env, err: FETCH_ERR.LOAD_ERROR, date: 7});
+      }
+    });
+    const spy3 = jest.spyOn(envStatus, 'getVersionFromPackage').mockImplementation(() => {
+      return '1.1.0';
+    });
+    const consoleRestore = mockConsole();
     const spinnerRestore = mockSpinner(spinner);
-    runner.run();
-    expect(spinner.start).toBeCalledWith(Runner.MESSAGES.SPINNER_START);
-    spinnerRestore();
+    return runner.run().then((msg: string) => {
+      expect(msg).toBe('');
+      spinnerRestore();
+      consoleRestore();
+      spy3.mockRestore();
+      spy2.mockRestore();
+      spy.mockRestore();
+    });
   });
 });
