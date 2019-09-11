@@ -8,6 +8,17 @@ import {FETCH_ERR, BRANCH_TYPES, IEnvData, IEnvErrData, IEnvConfig} from '../int
 
 let envStatus: EnvStatus;
 
+function mockEnvData(data: any): IEnvData {
+  return Object.assign({
+    env: '',
+    version: '',
+    branch: '',
+    commit: '',
+    author: '',
+    date: '',
+  }, data);
+}
+
 beforeEach(() => {
   envStatus = new EnvStatus();
 });
@@ -38,9 +49,9 @@ describe('config', () => {
   test('setConfig called in first getConfig, not called in sencond getConfig', () => {
     const spy = jest.spyOn(envStatus, 'setConfig');
     envStatus.getConfig();
-    expect(spy.mock.calls.length === 1).toBeTruthy();
+    expect(spy.mock.calls.length).toBe(1);
     envStatus.getConfig();
-    expect(spy.mock.calls.length === 1).toBeTruthy();
+    expect(spy.mock.calls.length).toBe(1);
     spy.mockRestore();
   });
 });
@@ -337,6 +348,20 @@ describe('compareVersion', () => {
   });
 });
 
+describe('appendCurrentTimestampToUrl', () => {
+  test('without any param', () => {
+    const url = 'https://www.codemao.cn/';
+    const now = new Date();
+    expect(envStatus.appendCurrentTimestampToUrl(url, now)).toBe(`${url}?t=${now.getTime()}`);
+  });
+
+  test('with param', () => {
+    const url = 'https://www.codemao.cn/?a=1';
+    const now = new Date();
+    expect(envStatus.appendCurrentTimestampToUrl(url, now)).toBe(`${url}&t=${now.getTime()}`);
+  });
+});
+
 describe('fetchEnvData', () => {
   test('success and cached data', () => {
     const spy = jest.spyOn(fetch, 'fetchUrl').mockImplementationOnce((url: string, callback: any) => {
@@ -385,7 +410,7 @@ describe('fetchEnvData', () => {
     });
   });
 
-  test('FETCH_ERR.CONFIG_UNDEFINED error', () => {
+  test('config undefined', () => {
     const spy = jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
       return null;
     });
@@ -395,10 +420,10 @@ describe('fetchEnvData', () => {
     });
   });
 
-  test('FETCH_ERR.URL_FUNCTION_UNDEFINED error', () => {
+  test('url function undefined', () => {
     const spy = jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
-      const res = {url: ''} as unknown;
-      return res as IEnvConfig;
+      const res: any = {url: ''};
+      return res;
     });
     return envStatus.fetchEnvData('dev').then((data: IEnvErrData) => {
       spy.mockRestore();
@@ -408,7 +433,142 @@ describe('fetchEnvData', () => {
 });
 
 describe('isEnvAvailable', () => {
-  test('success', () => {
-    // TODO
+  test('not available without version', () => {
+    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
+      return Promise.resolve(mockEnvData({
+        env,
+      }));
+    });
+    return envStatus.isEnvAvailable('production').then((res) => {
+      expect(res).toBe(false);
+      spy.mockRestore();
+    });
+  });
+
+  test('production is always available', () => {
+    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
+      return Promise.resolve(mockEnvData({
+        env,
+        version: '1.0.0',
+      }));
+    });
+    return envStatus.isEnvAvailable('production').then((res) => {
+      expect(res).toBe(true);
+      spy.mockRestore();
+    });
+  });
+
+  test('staging is not available when version > production', () => {
+    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
+      return Promise.resolve(mockEnvData({
+        env,
+        version: env === 'staging' ? '1.0.1' : '1.0.0',
+      }));
+    });
+    return envStatus.isEnvAvailable('staging').then((res) => {
+      expect(res).toBe(false);
+      spy.mockRestore();
+    });
+  });
+
+  test('staging is available when version <= production', () => {
+    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
+      return Promise.resolve(mockEnvData({
+        env,
+        version: env === 'staging' ? '1.0.0' : '1.0.1',
+      }));
+    });
+    return envStatus.isEnvAvailable('staging').then((res) => {
+      expect(res).toBe(true);
+      spy.mockRestore();
+    });
+  });
+
+  test('env is not available when version > staging', () => {
+    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
+      return Promise.resolve(mockEnvData({
+        env,
+        version: env === 'dev' ? '1.0.1' : '1.0.0',
+      }));
+    });
+    return envStatus.isEnvAvailable('dev').then((res) => {
+      expect(res).toBe(false);
+      spy.mockRestore();
+    });
+  });
+
+  test('env is available when version == staging', () => {
+    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
+      return Promise.resolve(mockEnvData({
+        env,
+        version: '1.0.0',
+      }));
+    });
+    return envStatus.isEnvAvailable('dev').then((res) => {
+      expect(res).toBe(true);
+      spy.mockRestore();
+    });
+  });
+
+  test('env is not available when version < staging and version > production', () => {
+    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
+      return Promise.resolve(mockEnvData({
+        env,
+        version: env === 'dev' ? '1.0.1' : env === 'staging' ? '1.1.0' : '1.0.0',
+      }));
+    });
+    return envStatus.isEnvAvailable('dev').then((res) => {
+      expect(res).toBe(false);
+      spy.mockRestore();
+    });
+  });
+
+  test('env is available when version < staging and version == production', () => {
+    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
+      return Promise.resolve(mockEnvData({
+        env,
+        version: env === 'dev' ? '1.0.1' : env === 'staging' ? '1.1.0' : '1.0.1',
+      }));
+    });
+    return envStatus.isEnvAvailable('dev').then((res) => {
+      expect(res).toBe(true);
+      spy.mockRestore();
+    });
+  });
+
+  test('env is available when version < staging and version < production \
+and production head commit is ancestor of env head commit', () => {
+    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
+      return Promise.resolve(mockEnvData({
+        env,
+        version: env === 'dev' ? '1.0.0' : '1.0.1',
+      }));
+    });
+    const spy2 = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
+      return Buffer.from('');
+    });
+    return envStatus.isEnvAvailable('dev').then((res) => {
+      expect(res).toBe(true);
+      spy2.mockRestore();
+      spy.mockRestore();
+    });
+  });
+
+  test('env is not available when version < staging and version < production \
+and production head commit is not ancestor of env head commit', () => {
+    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
+      return Promise.resolve(mockEnvData({
+        env,
+        version: env === 'dev' ? '1.0.0' : '1.0.1',
+      }));
+    });
+    const spy2 = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
+      throw new Error('error');
+    });
+    return envStatus.isEnvAvailable('dev').then((res) => {
+      expect(res).toBe(false);
+      spy2.mockRestore();
+      spy.mockRestore();
+    });
   });
 });

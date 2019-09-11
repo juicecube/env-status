@@ -174,6 +174,10 @@ export class EnvStatus {
     this.envDataCache[env] = data;
   }
 
+  public appendCurrentTimestampToUrl(url: string, now: Date) {
+    return `${url}${url.indexOf('?') > 0 ? '&' : '?'}t=${now.getTime()}`;
+  }
+
   public fetchEnvData(env: string): Promise<IEnvData | IEnvErrData> {
     return new Promise((resolve: (res: IEnvData | IEnvErrData) => void) => {
       if (this.envDataCache[env]) {
@@ -190,7 +194,7 @@ export class EnvStatus {
         return;
       }
       const url = config.url(env);
-      fetch.fetchUrl(`${url}${url.indexOf('?') > 0 ? '&' : '?'}t=${Date.now()}`, (error: any, meta: any, body: any) => {
+      fetch.fetchUrl(this.appendCurrentTimestampToUrl(url, new Date()), (error: any, meta: any, body: any) => {
         let data;
         if (error || meta.status !== 200) {
           data = {err: FETCH_ERR.LOAD_ERROR, env};
@@ -209,9 +213,9 @@ export class EnvStatus {
 
   public isEnvAvailable(env: string): Promise<boolean> {
     return Promise.all(['production', 'staging', env].map((e) => this.fetchEnvData(e))).then((envsData) => {
-      const envData: any = envsData[2] || {};
-      const stgData: any = envsData[1] || {};
-      const prdData: any = envsData[0] || {};
+      const envData: any = envsData[2];
+      const stgData: any = envsData[1];
+      const prdData: any = envsData[0];
       if (!envData.version) {
         return false;
       }
@@ -243,9 +247,6 @@ export class EnvStatus {
               } catch (err) {
                 return false;
               }
-            }).catch((err) => {
-              console.error(err);
-              return false;
             });
           }
         }
