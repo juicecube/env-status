@@ -23,10 +23,10 @@ export class Runner {
     this.envStatus.getOriginBranchVersion(branch).then((version: string) => {
       if (this.envStatus.compareVersion(localVersion, version) === result) {
         this.createDiff(branch);
-        process.exit(0);
+      } else {
+        console.log(chalk.red(`The '${branchName}' branch has a wrong version.`));
+        process.exit(1);
       }
-      console.log(chalk.red(`The '${branchName}' branch has a wrong version.`));
-      process.exit(1);
     });
   }
 
@@ -38,7 +38,7 @@ export class Runner {
     // 当前分支为others的话不处理
     if (branchType === BRANCH_TYPES.OTHERS) {
       console.log(chalk.yellow(`Branch '${branchName}' is not viable for arc-diff.`));
-      process.exit(0);
+      return;
     }
 
     // 当前分支为迭代分支，判断本地和远程迭代版本是否一致

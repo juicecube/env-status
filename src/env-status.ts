@@ -21,6 +21,10 @@ export class Runner {
     }
   }
 
+  public getPackageVersion(): string {
+    return require(path.resolve(__dirname, '../package.json')).version;
+  }
+
   public run() {
     const config = this.envStatus.getConfig();
     const args = this.envStatus.getArgs(process.argv);
@@ -30,37 +34,33 @@ export class Runner {
       if (config) {
         console.log(chalk.yellow('.envstatus.js file already exists!'));
       } else {
-        const configPath = path.resolve(__dirname, '../../.envstatus.js');
-        fs.writeFileSync(path.resolve('.envstatus2.js'), fs.readFileSync(configPath));
+        const configPath = path.resolve(__dirname, '../.envstatus.js');
+        fs.writeFileSync(path.resolve('.envstatus.js'), fs.readFileSync(configPath));
         console.log(chalk.green('.envstatus.js file created!'));
       }
-      process.exit();
+      return;
     }
 
     if (requestEnv === '--gen') {
-      const pkgInfo = require(path.resolve('package.json'));
-
       const data = this.envStatus.getLastCommit(new Date());
-      data.version = pkgInfo.version;
+      data.version = this.envStatus.getVersionFromPackage();
 
       const outputPath = path.resolve(config && config.gen || 'dist/env-status.json');
       mkdirp.sync(path.dirname(outputPath));
       fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
-      process.exit();
+      return;
     }
 
-    if (requestEnv === '--version' || requestEnv === '-v') {
-      const pkgInfo = require(path.resolve(__dirname, '../../package.json'));
-
-      console.log(pkgInfo.version);
-      process.exit();
+    if (requestEnv === '--version') {
+      console.log(this.getPackageVersion());
+      return;
     }
 
     const spinner = ora('Loading .envstatus.js').start();
 
     if (!config) {
       spinner.fail(`${chalk.yellow('.envstatus.js')} file is missing!`);
-      process.exit();
+      return;
     }
 
     const envs = (config.envs || []).filter((env) =>
@@ -70,19 +70,11 @@ export class Runner {
     if (requestEnv && envs.length < 2) {
       if (!envs.length || envs[0] !== requestEnv) {
         spinner.fail(`env ${chalk.yellow(requestEnv)} undefined!`);
-        process.exit();
+        return;
       }
     }
 
-    const currentVersion = (() => {
-      try {
-        const pkgInfo = require(path.resolve('package.json'));
-
-        return pkgInfo.version;
-      } catch (err) {
-        console.error(err);
-      }
-    })();
+    const currentVersion = this.envStatus.getVersionFromPackage();
 
     spinner.text = 'Loading envs data';
 
