@@ -5,19 +5,9 @@ import * as path from 'path';
 import * as fetch from 'fetch';
 import {EnvStatus} from '../index';
 import {FETCH_ERR, BRANCH_TYPES, IEnvData, IEnvErrData} from '../interfaces';
+import {mockEnvData} from './util';
 
 let envStatus: EnvStatus;
-
-function mockEnvData(data: any): IEnvData {
-  return Object.assign({
-    env: '',
-    version: '',
-    branch: '',
-    commit: '',
-    author: '',
-    date: '',
-  }, data);
-}
 
 beforeEach(() => {
   envStatus = new EnvStatus();
