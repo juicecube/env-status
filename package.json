@@ -1,6 +1,6 @@
 {
   "name": "env-status",
-  "version": "0.29.0",
+  "version": "0.30.0",
   "description": "A command to show each env status, whether it is using for testing or available for using.",
   "keywords": [
     "env",
@@ -48,7 +48,6 @@
   },
   "dependencies": {
     "as-table": "^1.0.52",
-    "bluebird": "^3.5.5",
     "chalk": "^2.4.2",
     "fetch": "^1.1.0",
     "mkdirp": "^0.5.1",
