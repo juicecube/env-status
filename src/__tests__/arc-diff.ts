@@ -29,7 +29,7 @@ describe('run', () => {
     });
   });
 
-  test('branch name is not viable for arc-diff', () => {
+  test('branch type is not viable for arc-diff', () => {
     const spy = jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'master';
     });
@@ -49,63 +49,27 @@ describe('run', () => {
     });
   });
 
-  test('feature branch and version compare result is 0', () => {
+  test('iteration feature branch diff with remote iteration branch, pass', () => {
     const spy = jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return '1.0.0-feat-xxx';
     });
     const spy2 = jest.spyOn(envStatus, 'getVersionFromPackage').mockImplementationOnce(() => {
       return '1.0.0';
     });
-    const spy3 = jest.spyOn(envStatus, 'compareVersion').mockImplementationOnce((...args) => {
-      return 0;
-    });
-    const spy4 = jest.spyOn(envStatus as any, 'getOriginBranchVersion').mockImplementationOnce(() => {
-      return Promise.resolve('1.0.0');
-    });
-    const spy5 = jest.spyOn(child_process, 'spawnSync').mockImplementationOnce((...args) => {
+    const spy3 = jest.spyOn(child_process, 'spawnSync').mockImplementationOnce((...args) => {
       return 0 as any;
     });
     const consoleRestore = mockConsole();
     return runner.run().then((code: number) => {
       expect(code).toBe(0);
       consoleRestore();
-      spy5.mockRestore();
-      spy4.mockRestore();
       spy3.mockRestore();
       spy2.mockRestore();
       spy.mockRestore();
     });
   });
 
-  test('feature branch and version compare result is not 0', () => {
-    const spy = jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
-      return '1.0.0-feat-xxx';
-    });
-    const spy2 = jest.spyOn(envStatus, 'getVersionFromPackage').mockImplementationOnce(() => {
-      return '1.0.0';
-    });
-    const spy3 = jest.spyOn(envStatus, 'compareVersion').mockImplementationOnce((...args) => {
-      return -1;
-    });
-    const spy4 = jest.spyOn(envStatus as any, 'getOriginBranchVersion').mockImplementationOnce(() => {
-      return Promise.resolve('1.1.0');
-    });
-    const spy5 = jest.spyOn(child_process, 'spawnSync').mockImplementationOnce((...args) => {
-      return 0 as any;
-    });
-    const consoleRestore = mockConsole();
-    return runner.run().then((code: number) => {
-      expect(code).toBe(3);
-      consoleRestore();
-      spy5.mockRestore();
-      spy4.mockRestore();
-      spy3.mockRestore();
-      spy2.mockRestore();
-      spy.mockRestore();
-    });
-  });
-
-  test('iteration fix branch and version compare result is 0', () => {
+  test('iteration fix branch diff with remote master and version compare result is 0, pass', () => {
     const spy = jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return '1.0.0-fix-xxx';
     });
@@ -133,7 +97,7 @@ describe('run', () => {
     });
   });
 
-  test('iteration fix branch and version compare result is not 0', () => {
+  test('iteration fix branch diff with remote master and version compare result is not 0, fail', () => {
     const spy = jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return '1.0.0-fix-xxx';
     });
@@ -161,7 +125,7 @@ describe('run', () => {
     });
   });
 
-  test('hotfix branch and version compare result is 1', () => {
+  test('hotfix branch diff with remote master and version compare result is 1, pass', () => {
     const spy = jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return '1.0.1-fix-xxx';
     });
@@ -189,7 +153,7 @@ describe('run', () => {
     });
   });
 
-  test('hotfix branch and version compare result is not 1', () => {
+  test('hotfix branch diff with remote master and version compare result is not 1, fail', () => {
     const spy = jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return '1.0.1-fix-xxx';
     });
@@ -217,7 +181,7 @@ describe('run', () => {
     });
   });
 
-  test('iteration branch and version compare result is 1', () => {
+  test('iteration branch diff with remote master and version compare result is 1, pass', () => {
     const spy = jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return '1.1.0';
     });
@@ -245,7 +209,7 @@ describe('run', () => {
     });
   });
 
-  test('iteration branch and version compare result is not 1', () => {
+  test('iteration branch diff with remote master and version compare result is not 1, fail', () => {
     const spy = jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return '1.1.0';
     });

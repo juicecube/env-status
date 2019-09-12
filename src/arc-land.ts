@@ -1,119 +1,110 @@
 import * as child_process from 'child_process';
 import * as chalk from 'chalk';
 import {EnvStatus} from './index';
-import {BRANCH_TYPES, IEnvData, isEnvErrDataType} from './interfaces';
+import {BRANCH_TYPES, isEnvErrDataType} from './interfaces';
 
 export class Runner {
   constructor(private envStatus: EnvStatus) {}
 
-  public createLand(branch: string) {
-    const args = this.envStatus.getArgs(process.argv);
-    child_process.spawnSync('arc', ['land', '--onto', branch, ...args], {stdio: 'inherit'});
-  }
-
-  public landLocalBranch(branch: string, result = 0) {
-    const branchName = this.envStatus.getBranchName();
-    const branchNameVersion = this.envStatus.getVersionFromBranchName(branchName);
-    const localVersion = this.envStatus.getVersionFromPackage();
-
-    if (localVersion !== branchNameVersion) {
-      console.log(chalk.red(`The '${branchName}' branch has a wrong version or a wrong name.`));
-      process.exit(1);
-    }
-    this.envStatus.getOriginBranchVersion(branch).then((version: string) => {
-      if (this.envStatus.compareVersion(localVersion, version) === result) {
-        this.createLand(branch);
-        if (branch === 'master') {
-          child_process.spawnSync('git', ['tag', 'v' + version]);
-          child_process.spawnSync('git', ['push', '--tags']);
-        }
-      } else {
-        console.log(chalk.red(`The '${branchName}' branch has a wrong version.`));
-        process.exit(1);
-      }
-    });
-  }
-
-  public run() {
+  public run(): Promise<number> {
     const branchName = this.envStatus.getBranchName();
     const branchType = this.envStatus.getBranchType(branchName);
     const branchNameVersion = this.envStatus.getVersionFromBranchName(branchName);
     const localVersion = this.envStatus.getVersionFromPackage();
 
-    // 当前分支为others的话不处理
-    if (branchType === BRANCH_TYPES.OTHERS) {
-      console.log(chalk.yellow(`Branch '${branchName}' is not viable for arc-land.`));
-      return;
+    if (localVersion !== branchNameVersion) {
+      console.log(chalk.red(`The '${branchName}' branch has a wrong version or a wrong name.`));
+      return Promise.resolve(1);
     }
 
-    // 当前分支为迭代分支，判断本地和远程迭代版本是否一致
     if (branchType === BRANCH_TYPES.ITERATION_FEATURE) {
-      this.landLocalBranch(branchNameVersion, 0);
-    }
-
-    // 当前分支为迭代公共分支
-    if (branchType === BRANCH_TYPES.ITERATION) {
-      Promise.all([
-        this.envStatus.getOriginBranchVersion('master'),
+      this.createLand(branchNameVersion);
+      return Promise.resolve(0);
+    } else if (branchType === BRANCH_TYPES.ITERATION) {
+      return Promise.all([
+        this.envStatus.isEnvAvailable('staging'),
+        this.envStatus.fetchEnvData('staging'),
+        this.envStatus.fetchEnvData('production'),
+      ]).then((values) => {
+        const stagingAvailable = values[0];
+        const stgInfo = values[1];
+        const prdInfo = values[2];
+        if (isEnvErrDataType(stgInfo) || isEnvErrDataType(prdInfo)) {
+          console.log(chalk.red('Failed to fetch env data!'));
+          return 11;
+        }
+        if (stagingAvailable && this.envStatus.compareVersion(localVersion, prdInfo.version) !== 1) {
+          console.log(chalk.red('New version must be greater than production version!'));
+          return 12;
+        }
+        if (!stagingAvailable && this.envStatus.compareVersion(localVersion, stgInfo.version) !== 0) {
+          console.log(chalk.red('Version must be same as staging version!'));
+          return 13;
+        }
+        this.createLand('master');
+        return 0;
+      }).catch((err) => {
+        console.log(chalk.red('Failed to fetch env data!'));
+        return 14;
+      });
+    } else if (branchType === BRANCH_TYPES.ITERATION_FIX) {
+      return Promise.all([
+        this.envStatus.isEnvAvailable('staging'),
         this.envStatus.fetchEnvData('staging'),
       ]).then((values) => {
-        const masterVersion = values[0];
-        const stagingInfo = values[1];
-
-        // staging环境是否异常
-        if (isEnvErrDataType(stagingInfo)) {
+        const stagingAvailable = values[0];
+        const stgInfo = values[1];
+        if (isEnvErrDataType(stgInfo)) {
           console.log(chalk.red('Failed to fetch env data!'));
-          process.exit(1);
-        } else if (stagingInfo.version !== masterVersion) {
-          console.log(chalk.red('Staging environment should keep same version with master!'));
-          process.exit(1);
+          return 21;
         }
-        this.envStatus.fetchEnvData('production').then((pInfo) => {
-          // production环境是否和master一致并且当前分支版本大于master
-          if (isEnvErrDataType(pInfo)) {
-            console.log(chalk.red('Failed to fetch env data!'));
-            process.exit(1);
-          } else if (pInfo.version === masterVersion &&
-            this.envStatus.compareVersion(localVersion, masterVersion) === 1) {
-            this.createLand('master');
-          } else {
-            console.log(chalk.red(`The '${branchName}' branch is not viable for arc-land`));
-            process.exit(1);
-          }
-        });
+        if (stagingAvailable) {
+          console.log(chalk.red('Staging status does not compliant!'));
+          return 22;
+        }
+        if (!stagingAvailable && this.envStatus.compareVersion(localVersion, stgInfo.version) !== 0) {
+          console.log(chalk.red('Version must be same as staging version!'));
+          return 23;
+        }
+        this.createLand('master');
+        return 0;
       }).catch((err) => {
-        console.log(chalk.red('Need more Staging or Production environment info!'));
-        process.exit(1);
+        console.log(chalk.red('Failed to fetch env data!'));
+        return 24;
       });
-    }
-
-    // 当前分支为迭代fix分支
-    if (branchType === BRANCH_TYPES.ITERATION_FIX) {
-      Promise.all([
-        this.envStatus.getOriginBranchVersion('master'),
+    } else if (branchType === BRANCH_TYPES.HOTFIX) {
+      return Promise.all([
+        this.envStatus.isEnvAvailable('staging'),
         this.envStatus.fetchEnvData('production'),
-      ]).then((values: [string, IEnvData]) => {
-        if (isEnvErrDataType(values[1])) {
+      ]).then((values) => {
+        const stagingAvailable = values[0];
+        const prdInfo = values[1];
+        if (isEnvErrDataType(prdInfo)) {
           console.log(chalk.red('Failed to fetch env data!'));
-          process.exit(1);
-          return;
+          return 31;
         }
-
-        const masterVersion = values[0];
-        const prodVersion = values[1].version;
-
-        if (this.envStatus.compareVersion(masterVersion, prodVersion) === 1) {
-          this.landLocalBranch('master', 0);
+        if (!stagingAvailable) {
+          console.log(chalk.red('Staging status does not compliant!'));
+          return 32;
         }
+        if (stagingAvailable && this.envStatus.compareVersion(localVersion, prdInfo.version) !== 1) {
+          console.log(chalk.red('New version must be greater than production version!'));
+          return 33;
+        }
+        this.createLand('master');
+        return 0;
       }).catch((err) => {
-        console.log(chalk.red('Need more Staging or Production environment info!'));
-        process.exit(1);
+        console.log(chalk.red('Failed to fetch env data!'));
+        return 34;
       });
+    } else {
+      console.log(chalk.yellow(`Branch '${branchName}' is not viable for arc-land.`));
+      return Promise.resolve(99);
     }
+  }
 
-    // 当前分支为hotfix分支
-    if (branchType === BRANCH_TYPES.HOTFIX) {
-      this.landLocalBranch('master', 1);
-    }
+  private createLand(branch: string) {
+    const args = this.envStatus.getArgs(process.argv);
+    child_process.spawnSync('arc', ['land', '--onto', branch, ...args], {stdio: 'inherit'});
   }
 }

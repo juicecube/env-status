@@ -21,9 +21,9 @@ export class Runner {
     let compareResult: number;
 
     if (branchType === BRANCH_TYPES.ITERATION_FEATURE) {
-      // 当前分支为迭代分支，判断本地和远程迭代版本是否一致
-      diffBranch = branchNameVersion;
-      compareResult = 0;
+      // 当前分支为迭代特性分支，直接diff远程公共的迭代分支
+      this.createDiff(branchNameVersion);
+      return Promise.resolve(0);
     } else if (branchType === BRANCH_TYPES.ITERATION_FIX) {
       // 当前分支为迭代fix分支，判断本地和远程master是否一致
       diffBranch = 'master';
