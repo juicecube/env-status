@@ -1,5 +1,5 @@
+import * as child_process from 'child_process';
 import * as chalk from 'chalk';
-import {spawnSync} from 'child_process';
 import {EnvStatus} from './index';
 import {BRANCH_TYPES, IEnvData, isEnvErrDataType} from './interfaces';
 
@@ -8,7 +8,7 @@ export class Runner {
 
   public createLand(branch: string) {
     const args = this.envStatus.getArgs(process.argv);
-    spawnSync('arc', ['land', '--onto', branch, ...args], {stdio: 'inherit'});
+    child_process.spawnSync('arc', ['land', '--onto', branch, ...args], {stdio: 'inherit'});
   }
 
   public landLocalBranch(branch: string, result = 0) {
@@ -24,8 +24,8 @@ export class Runner {
       if (this.envStatus.compareVersion(localVersion, version) === result) {
         this.createLand(branch);
         if (branch === 'master') {
-          spawnSync('git', ['tag', 'v' + version]);
-          spawnSync('git', ['push', '--tags']);
+          child_process.spawnSync('git', ['tag', 'v' + version]);
+          child_process.spawnSync('git', ['push', '--tags']);
         }
       } else {
         console.log(chalk.red(`The '${branchName}' branch has a wrong version.`));
