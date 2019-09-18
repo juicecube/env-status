@@ -534,11 +534,15 @@ and production head commit is ancestor of env head commit', () => {
         version: env === 'dev' ? '1.0.0' : '1.0.1',
       }));
     });
-    const spy2 = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
+    const spy2 = jest.spyOn(envStatus, 'fetchOrigin').mockImplementationOnce(() => {
+      return Promise.resolve();
+    });
+    const spy3 = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
       return Buffer.from('');
     });
     return envStatus.isEnvAvailable('dev').then((res) => {
       expect(res).toBe(true);
+      spy3.mockRestore();
       spy2.mockRestore();
       spy.mockRestore();
     });
@@ -552,11 +556,15 @@ and production head commit is not ancestor of env head commit', () => {
         version: env === 'dev' ? '1.0.0' : '1.0.1',
       }));
     });
-    const spy2 = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
+    const spy2 = jest.spyOn(envStatus, 'fetchOrigin').mockImplementationOnce(() => {
+      return Promise.resolve();
+    });
+    const spy3 = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
       throw new Error('error');
     });
     return envStatus.isEnvAvailable('dev').then((res) => {
       expect(res).toBe(false);
+      spy3.mockRestore();
       spy2.mockRestore();
       spy.mockRestore();
     });
