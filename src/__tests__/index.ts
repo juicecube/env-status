@@ -54,12 +54,12 @@ describe('getArgs', () => {
 
 describe('fetchOrigin', () => {
   test('success', () => {
-    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args): ChildProcess => {
+    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
       expect(args[0]).toEqual('git');
       expect(args[1]).toEqual(['fetch', 'origin']);
       expect(typeof args[2]).toEqual('function');
       setImmediate(args[2] as () => void);
-      return child_process.exec('echo ok');
+      return 0 as any;
     });
     return envStatus.fetchOrigin().then(() => {
       spy.mockRestore();
@@ -67,9 +67,9 @@ describe('fetchOrigin', () => {
   });
 
   test('throw error', () => {
-    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args): ChildProcess => {
+    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
       setImmediate(() => (args[2] as (err: Error) => void)(new Error('error')));
-      return child_process.exec('echo error');
+      return 0 as any;
     });
     return envStatus.fetchOrigin().catch((err: Error) => {
       expect(err.message).toEqual('error');
@@ -78,9 +78,9 @@ describe('fetchOrigin', () => {
   });
 
   test('cached success promise', () => {
-    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args): ChildProcess => {
+    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
       setImmediate(args[2] as () => void);
-      return child_process.exec('echo ok');
+      return 0 as any;
     });
     const promise = envStatus.fetchOrigin();
     return promise.then(() => {
@@ -90,9 +90,9 @@ describe('fetchOrigin', () => {
   });
 
   test('not cache failed promise', () => {
-    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args): ChildProcess => {
+    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
       setImmediate(() => (args[2] as (err: Error) => void)(new Error('error')));
-      return child_process.exec('echo error');
+      return 0 as any;
     });
     const promise = envStatus.fetchOrigin();
     return promise.catch(() => {
@@ -200,9 +200,9 @@ describe('getBranchName', () => {
 
 describe('getOriginBranchVersion', () => {
   test('success', () => {
-    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args): ChildProcess => {
+    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
       setImmediate(args[2] as () => void);
-      return child_process.exec('echo ok');
+      return 0 as any;
     });
     const spy2 = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
       return Buffer.from('- "version": "1.0.0"');
@@ -215,9 +215,9 @@ describe('getOriginBranchVersion', () => {
   });
 
   test('get from package.json', () => {
-    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args): ChildProcess => {
+    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
       setImmediate(args[2] as () => void);
-      return child_process.exec('echo ok');
+      return 0 as any;
     });
     const spy2 = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
       return Buffer.from('');
@@ -230,9 +230,9 @@ describe('getOriginBranchVersion', () => {
   });
 
   test('fetch error', () => {
-    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args): ChildProcess => {
+    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
       setImmediate(() => (args[2] as (err: Error) => void)(new Error('error')));
-      return child_process.exec('echo error');
+      return 0 as any;
     });
     return envStatus.getOriginBranchVersion('dev').catch((err) => {
       expect(err.message).toEqual('error');
@@ -241,9 +241,9 @@ describe('getOriginBranchVersion', () => {
   });
 
   test('diff error', () => {
-    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args): ChildProcess => {
+    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
       setImmediate(args[2] as () => void);
-      return child_process.exec('echo ok');
+      return 0 as any;
     });
     const spy2 = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce(() => {
       throw new Error('error');
