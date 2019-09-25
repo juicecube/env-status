@@ -2,10 +2,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as ora from 'ora';
 import mockConsole from 'jest-mock-console';
-import {EnvStatus} from '../index';
-import {Runner} from '../env-status';
-import {FETCH_ERR} from '../interfaces';
-import {mockSpinner, mockEnvData} from './util';
+import { EnvStatus } from '../index';
+import { Runner } from '../env-status';
+import { FETCH_ERR } from '../interfaces';
+import { mockSpinner, mockEnvData } from './util';
 
 let envStatus: EnvStatus;
 let spinner: ora.Ora;

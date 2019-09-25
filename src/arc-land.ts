@@ -1,7 +1,7 @@
 import * as child_process from 'child_process';
 import * as chalk from 'chalk';
-import {EnvStatus} from './index';
-import {BRANCH_TYPES, isEnvErrDataType} from './interfaces';
+import { EnvStatus } from './index';
+import { BRANCH_TYPES, isEnvErrDataType } from './interfaces';
 
 export class Runner {
   constructor(private envStatus: EnvStatus) {}

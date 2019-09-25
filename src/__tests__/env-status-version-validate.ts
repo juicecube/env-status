@@ -1,7 +1,7 @@
-import {mockProcessExit} from 'jest-mock-process';
+import { mockProcessExit } from 'jest-mock-process';
 import mockConsole from 'jest-mock-console';
-import {EnvStatus} from '../index';
-import {Runner} from '../env-status-version-validate';
+import { EnvStatus } from '../index';
+import { Runner } from '../env-status-version-validate';
 
 let envStatus: EnvStatus;
 let runner: Runner;

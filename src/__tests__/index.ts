@@ -1,11 +1,10 @@
 import * as child_process from 'child_process';
-import {ChildProcess} from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as fetch from 'fetch';
-import {EnvStatus} from '../index';
-import {FETCH_ERR, BRANCH_TYPES, IEnvData, IEnvErrData} from '../interfaces';
-import {mockEnvData} from './util';
+import { EnvStatus } from '../index';
+import { FETCH_ERR, BRANCH_TYPES, IEnvData, IEnvErrData } from '../interfaces';
+import { mockEnvData } from './util';
 
 let envStatus: EnvStatus;
 

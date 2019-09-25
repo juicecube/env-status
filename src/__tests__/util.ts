@@ -1,5 +1,5 @@
 import * as ora from 'ora';
-import {IEnvData} from '../interfaces';
+import { IEnvData } from '../interfaces';
 
 export function mockEnvData(data: any): IEnvData {
   return Object.assign({

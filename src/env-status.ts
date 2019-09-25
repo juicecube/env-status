@@ -5,8 +5,8 @@ import * as mkdirp from 'mkdirp';
 import * as moment from 'moment';
 import * as ora from 'ora';
 import * as path from 'path';
-import {EnvStatus} from './index';
-import {IEnvData, isEnvErrDataType} from './interfaces';
+import { EnvStatus } from './index';
+import { IEnvData, isEnvErrDataType } from './interfaces';
 
 export class Runner {
   public static MESSAGES = {

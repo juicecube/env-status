@@ -1,7 +1,7 @@
 import * as child_process from 'child_process';
 import mockConsole from 'jest-mock-console';
-import {EnvStatus} from '../index';
-import {Runner} from '../arc-diff';
+import { EnvStatus } from '../index';
+import { Runner } from '../arc-diff';
 
 let envStatus: EnvStatus;
 let runner: Runner;

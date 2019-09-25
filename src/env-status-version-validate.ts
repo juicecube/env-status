@@ -1,7 +1,7 @@
 import * as chalk from 'chalk';
 import * as path from 'path';
-import {EnvStatus} from './index';
-import {BRANCH_TYPES} from './interfaces';
+import { EnvStatus } from './index';
+import { BRANCH_TYPES } from './interfaces';
 
 export class Runner {
   constructor(private envStatus: EnvStatus) {}

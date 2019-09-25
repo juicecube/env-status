@@ -3,7 +3,7 @@ import * as fetch from 'fetch';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import {FETCH_ERR, BRANCH_TYPES, IEnvConfig, IEnvData, IEnvErrData} from './interfaces';
+import { FETCH_ERR, BRANCH_TYPES, IEnvConfig, IEnvData, IEnvErrData } from './interfaces';
 
 export class EnvStatus {
   public static getShared(): EnvStatus {
