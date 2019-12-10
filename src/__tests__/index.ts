@@ -339,13 +339,13 @@ describe('compareVersion', () => {
 
 describe('appendCurrentTimestampToUrl', () => {
   test('without any param', () => {
-    const url = 'https://www.codemao.cn/';
+    const url = 'https://www.mydomain.com/';
     const now = new Date();
     expect(envStatus.appendCurrentTimestampToUrl(url, now)).toBe(`${url}?t=${now.getTime()}`);
   });
 
   test('with param', () => {
-    const url = 'https://www.codemao.cn/?a=1';
+    const url = 'https://www.mydomain.com/?a=1';
     const now = new Date();
     expect(envStatus.appendCurrentTimestampToUrl(url, now)).toBe(`${url}&t=${now.getTime()}`);
   });
