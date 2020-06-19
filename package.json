@@ -1,6 +1,6 @@
 {
   "name": "env-status",
-  "version": "0.30.0",
+  "version": "1.0.0",
   "description": "A command to show each env status, whether it is using for testing or available for using.",
   "keywords": [
     "env",
@@ -33,7 +33,7 @@
     "arc-diff": "./lib/bin/arc-diff.js",
     "arc-land": "./lib/bin/arc-land.js",
     "env-status": "./lib/bin/env-status.js",
-    "env-status-version-validate": "./lib/bin/env-status-version-validate.js"
+    "merge-validate": "./lib/bin/merge-validate.js"
   },
   "scripts": {
     "build": "tsc",

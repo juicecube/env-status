@@ -1,0 +1,50 @@
+import * as child_process from 'child_process';
+import * as chalk from 'chalk';
+import { EnvStatus } from './index';
+import { BRANCH_TYPES } from './interfaces';
+
+export class Runner {
+  constructor(private envStatus: EnvStatus) {}
+
+  public run(): Promise<number> {
+    const args = this.envStatus.getArgs(process.argv);
+    const targetBranchName = args[1];
+    const targetBranchType = this.envStatus.getBranchType(targetBranchName);
+    const branchName = args[0];
+    const branchType = this.envStatus.getBranchType(branchName);
+
+    return this.envStatus.fetchOrigin().then(() => {
+      const branchCommit = this.envStatus.getBranchLastCommitId('origin/' + branchName);
+      const targetBranchCommit = this.envStatus.getBranchLastCommitId('origin/' + targetBranchName);
+
+      if (
+        (branchType === BRANCH_TYPES.ITERATION || branchType === BRANCH_TYPES.HOTFIX)
+        && targetBranchType !== BRANCH_TYPES.MASTER
+      ) {
+        console.log(chalk.red('Sprint and hotfix branch must be merged into master branch.'));
+        return 1;
+      }
+      if (
+        (branchType === BRANCH_TYPES.ITERATION_FEATURE || branchType === BRANCH_TYPES.ITERATION_FIX)
+        && targetBranchType !== BRANCH_TYPES.ITERATION
+      ) {
+        console.log(chalk.red('Feature and fix branch must be merged into sprint branch.'));
+        return 2;
+      }
+      if (branchType === BRANCH_TYPES.MASTER || branchType === BRANCH_TYPES.OTHERS) {
+        console.log(chalk.red(`Source branch name "${branchName}" is invalid.`));
+        return 3;
+      }
+
+      if (!this.envStatus.isAncestorCommit(targetBranchCommit, branchCommit)) {
+        console.log(chalk.red(`Please merge lastest commits from "${targetBranchName}" into "${branchName}" first.`));
+        return 4;
+      }
+
+      return 0;
+    }).catch(() => {
+      console.log(chalk.red('Failed to fetch origin.'));
+      return 10;
+    });
+  }
+}
