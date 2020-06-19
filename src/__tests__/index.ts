@@ -101,52 +101,6 @@ describe('fetchOrigin', () => {
   });
 });
 
-describe('isValidVersion', () => {
-  test('1.0.0 is valid', () => {
-    expect(envStatus.isValidVersion('1.0.0')).toBeTruthy();
-  });
-
-  test('0.1.0 is valid', () => {
-    expect(envStatus.isValidVersion('0.1.0')).toBeTruthy();
-  });
-
-  test('0.1.1 with fix param is valid', () => {
-    expect(envStatus.isValidVersion('0.1.1', true)).toBeTruthy();
-  });
-
-  test('0.0.1 is not valid', () => {
-    expect(envStatus.isValidVersion('0.0.1')).toBeFalsy();
-  });
-
-  test('0.0.0 is not valid', () => {
-    expect(envStatus.isValidVersion('0.0.0')).toBeFalsy();
-  });
-
-  test('01.0.0 is not valid', () => {
-    expect(envStatus.isValidVersion('01.0.0')).toBeFalsy();
-  });
-
-  test('0.01.0 is not valid', () => {
-    expect(envStatus.isValidVersion('0.01.0')).toBeFalsy();
-  });
-
-  test('1.0.01 is not valid', () => {
-    expect(envStatus.isValidVersion('1.0.01')).toBeFalsy();
-  });
-
-  test('1.0.1 without fix param is not valid', () => {
-    expect(envStatus.isValidVersion('1.0.1')).toBeFalsy();
-  });
-
-  test('1.0.0 with fix param is not valid', () => {
-    expect(envStatus.isValidVersion('1.0.0', true)).toBeFalsy();
-  });
-
-  test('1.0.0.0 is not valid', () => {
-    expect(envStatus.isValidVersion('1.0.0.0')).toBeFalsy();
-  });
-});
-
 describe('getLastCommit', () => {
   test('success', () => {
     const spy = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
@@ -197,64 +151,6 @@ describe('getBranchName', () => {
   });
 });
 
-describe('getOriginBranchVersion', () => {
-  test('success', () => {
-    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
-      setImmediate(args[2] as () => void);
-      return 0 as any;
-    });
-    const spy2 = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
-      return Buffer.from('- "version": "1.0.0"');
-    });
-    return envStatus.getOriginBranchVersion('dev').then((version) => {
-      expect(version).toEqual('1.0.0');
-      spy2.mockRestore();
-      spy.mockRestore();
-    });
-  });
-
-  test('get from package.json', () => {
-    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
-      setImmediate(args[2] as () => void);
-      return 0 as any;
-    });
-    const spy2 = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
-      return Buffer.from('');
-    });
-    return envStatus.getOriginBranchVersion('dev').then((version) => {
-      expect(version).toEqual(require(path.resolve('package.json')).version);
-      spy2.mockRestore();
-      spy.mockRestore();
-    });
-  });
-
-  test('fetch error', () => {
-    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
-      setImmediate(() => (args[2] as (err: Error) => void)(new Error('error')));
-      return 0 as any;
-    });
-    return envStatus.getOriginBranchVersion('dev').catch((err) => {
-      expect(err.message).toEqual('error');
-      spy.mockRestore();
-    });
-  });
-
-  test('diff error', () => {
-    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
-      setImmediate(args[2] as () => void);
-      return 0 as any;
-    });
-    const spy2 = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce(() => {
-      throw new Error('error');
-    });
-    return envStatus.getOriginBranchVersion('dev').catch((err) => {
-      expect(err.message).toEqual('error');
-      spy2.mockRestore();
-      spy.mockRestore();
-    });
-  });
-});
-
 describe('getBranchType', () => {
   test('1.0.0 is ITERATION', () => {
     expect(envStatus.getBranchType('1.0.0')).toEqual(BRANCH_TYPES.ITERATION);
@@ -286,54 +182,6 @@ describe('getBranchType', () => {
 
   test('01.0.0-fix-xxx is OTHERS', () => {
     expect(envStatus.getBranchType('01.0.0-fix-xxx')).toEqual(BRANCH_TYPES.OTHERS);
-  });
-});
-
-describe('getVersionFromBranchName', () => {
-  test('1.0.0 is version 1.0.0', () => {
-    expect(envStatus.getVersionFromBranchName('1.0.0')).toEqual('1.0.0');
-  });
-
-  test('1.0.0-feat-xxx is version 1.0.0', () => {
-    expect(envStatus.getVersionFromBranchName('1.0.0-feat-xxx')).toEqual('1.0.0');
-  });
-
-  test('1.0.0-fix-xxx is version 1.0.0', () => {
-    expect(envStatus.getVersionFromBranchName('1.0.0-fix-xxx')).toEqual('1.0.0');
-  });
-
-  test('1.0.1-fix-xxx is version 1.0.1', () => {
-    expect(envStatus.getVersionFromBranchName('1.0.1-fix-xxx')).toEqual('1.0.1');
-  });
-
-  test('empty return', () => {
-    expect(envStatus.getVersionFromBranchName('master')).toEqual('');
-  });
-});
-
-describe('compareVersion', () => {
-  test('return 9', () => {
-    expect(envStatus.compareVersion('1', '2')).toEqual(9);
-    expect(envStatus.compareVersion('1', '2.0.0')).toEqual(9);
-    expect(envStatus.compareVersion('1.0.0', '2')).toEqual(9);
-  });
-
-  test('return 1', () => {
-    expect(envStatus.compareVersion('1.0.0', '0.2.0')).toEqual(1);
-    expect(envStatus.compareVersion('1.0.1', '1.0.0')).toEqual(1);
-    expect(envStatus.compareVersion('1.1.0', '1.0.2')).toEqual(1);
-    expect(envStatus.compareVersion('2.0.0', '1.0.0')).toEqual(1);
-  });
-
-  test('return -1', () => {
-    expect(envStatus.compareVersion('0.2.0', '1.0.0')).toEqual(-1);
-    expect(envStatus.compareVersion('1.0.0', '1.0.1')).toEqual(-1);
-    expect(envStatus.compareVersion('1.0.2', '1.1.0')).toEqual(-1);
-    expect(envStatus.compareVersion('1.0.0', '2.0.0')).toEqual(-1);
-  });
-
-  test('return 0', () => {
-    expect(envStatus.compareVersion('1.0.0', '1.0.0')).toEqual(0);
   });
 });
 

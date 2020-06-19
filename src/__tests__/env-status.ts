@@ -157,16 +157,12 @@ describe('run', () => {
         return Promise.resolve({env, err: FETCH_ERR.LOAD_ERROR, date: 7});
       }
     });
-    const spy3 = jest.spyOn(envStatus, 'getVersionFromPackage').mockImplementation(() => {
-      return '1.1.0';
-    });
     const consoleRestore = mockConsole();
     const spinnerRestore = mockSpinner(spinner);
     return runner.run().then((msg: string) => {
       expect(msg).toBe('');
       spinnerRestore();
       consoleRestore();
-      spy3.mockRestore();
       spy2.mockRestore();
       spy.mockRestore();
     });

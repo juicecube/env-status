@@ -40,7 +40,6 @@ export class Runner {
 
     if (requestEnv === '--gen') {
       const data = this.envStatus.getLastCommit(new Date());
-      data.version = this.envStatus.getVersionFromPackage();
 
       const outputPath = path.resolve(config && config.gen || 'dist/env-status.json');
       mkdirp.sync(path.dirname(outputPath));
@@ -70,8 +69,6 @@ export class Runner {
       return Promise.resolve(Runner.MESSAGES.SPINNER_FAIL_REQUESTED_ENV_UNDEFINED);
     }
 
-    const currentVersion = this.envStatus.getVersionFromPackage();
-
     spinner.text = Runner.MESSAGES.SPINNER_LOADING_ENV_DATA;
 
     return Promise.all(envs.map((env) => this.envStatus.fetchEnvData(env))).then(async (envsData) => {
@@ -92,12 +89,11 @@ export class Runner {
         } else if (await this.envStatus.isEnvAvailable(data.env)) {
           status = chalk.green('Available');
         } else {
-          status = chalk.yellow('Using' + (currentVersion === data.version ? ' *' : ''));
+          status = chalk.yellow('Using');
         }
         const res = {
           env: data.env,
           status,
-          version: data.version,
           branch: data.branch,
           commit: data.commit,
           author: data.author,

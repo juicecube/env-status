@@ -10,12 +10,12 @@ export const enum BRANCH_TYPES {
   ITERATION_FEATURE = 'ITERATION_FEATURE',
   ITERATION_FIX = 'ITERATION_FIX',
   HOTFIX = 'HOTFIX',
+  MASTER = 'MASTER',
   OTHERS = 'OTHERS',
 }
 
 export interface IEnvData {
   env: string;
-  version: string;
   branch: string;
   commit: string;
   author: string;

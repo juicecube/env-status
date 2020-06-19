@@ -7,49 +7,41 @@ export class Runner {
   constructor(private envStatus: EnvStatus) {}
 
   public run(): Promise<number> {
+    const args = this.envStatus.getArgs(process.argv);
+    const targetBranchName = args[0];
+    const targetBranchType = this.envStatus.getBranchType(targetBranchName);
     const branchName = this.envStatus.getBranchName();
     const branchType = this.envStatus.getBranchType(branchName);
-    const branchNameVersion = this.envStatus.getVersionFromBranchName(branchName);
-    const localVersion = this.envStatus.getVersionFromPackage();
 
-    if (localVersion !== branchNameVersion) {
-      console.log(chalk.red(`The '${branchName}' branch has a wrong version or a wrong name.`));
-      return Promise.resolve(1);
-    }
+    return this.envStatus.fetchOrigin().then(() => {
+      const branchCommit = this.envStatus.getBranchLastCommitId(branchName);
+      const targetBranchCommit = this.envStatus.getBranchLastCommitId('origin/' + targetBranchName);
 
-    let diffBranch: string;
-    let compareResult: number;
-
-    if (branchType === BRANCH_TYPES.ITERATION_FEATURE) {
-      // 当前分支为迭代特性分支，直接diff远程公共的迭代分支
-      this.createDiff(branchNameVersion);
-      return Promise.resolve(0);
-    } else if (branchType === BRANCH_TYPES.ITERATION_FIX) {
-      // 当前分支为迭代fix分支，判断本地和远程master是否一致
-      diffBranch = 'master';
-      compareResult = 0;
-    } else if (branchType === BRANCH_TYPES.HOTFIX || branchType === BRANCH_TYPES.ITERATION) {
-      // 当前分支为hotfix分支或者公共的迭代分支，判断版本是否大于master
-      diffBranch = 'master';
-      compareResult = 1;
-    } else {
-      console.log(chalk.yellow(`Branch '${branchName}' is not viable for arc-diff.`));
-      return Promise.resolve(2);
-    }
-
-    return this.envStatus.getOriginBranchVersion(diffBranch).then((version: string) => {
-      if (this.envStatus.compareVersion(localVersion, version) === compareResult) {
-        this.createDiff(diffBranch);
-        return 0;
+      if (branchType === BRANCH_TYPES.ITERATION || branchType === BRANCH_TYPES.HOTFIX) {
+        if (targetBranchType !== BRANCH_TYPES.MASTER) {
+          console.log(chalk.red('Sprint and hotfix branch must be diffed with master branch.'));
+          return 1;
+        }
+      } else if (branchType === BRANCH_TYPES.ITERATION_FEATURE || branchType === BRANCH_TYPES.ITERATION_FIX) {
+        if (targetBranchType !== BRANCH_TYPES.ITERATION) {
+          console.log(chalk.red('Feature and fix branch must be diffed with sprint branch.'));
+          return 2;
+        }
       } else {
-        console.log(chalk.red(`The '${branchName}' branch has a wrong version.`));
+        console.log(chalk.red(`Working branch name "${branchName}" is invalid.`));
         return 3;
       }
-    });
-  }
 
-  private createDiff(branch: string) {
-    const args = this.envStatus.getArgs(process.argv);
-    child_process.spawnSync('arc', ['diff', `origin/${branch}`, ...args], {stdio: 'inherit'});
+      if (!this.envStatus.isAncestorCommit(targetBranchCommit, branchCommit)) {
+        console.log(chalk.red(`Please merge lastest commits from "${targetBranchName}" into "${branchName}" first.`));
+        return 4;
+      }
+
+      child_process.spawnSync('arc', ['diff', ...args], {stdio: 'inherit'});
+      return 0;
+    }).catch(() => {
+      console.log(chalk.red('Failed to fetch origin.'));
+      return 10;
+    });
   }
 }

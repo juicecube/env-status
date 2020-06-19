@@ -51,25 +51,6 @@ export class EnvStatus {
     });
   }
 
-  public isValidVersion(version: string, fix?: boolean) {
-    if ((/^\d+\.\d+\.\d+$/).test(version)) {
-      const parts = version.split('.');
-      if (parts[0] === '0' && parts[1] === '0') {
-        return false;
-      }
-      for (const x of parts) {
-        if (x.length > 1 && x.startsWith('0')) {
-          return false;
-        }
-      }
-      if (fix && parts[2] === '0' || !fix && parts[2] !== '0') {
-        return false;
-      }
-      return true;
-    }
-    return false;
-  }
-
   public getLastCommit(now: Date) {
     let jsonStr;
     try {
@@ -85,6 +66,19 @@ export class EnvStatus {
     return res;
   }
 
+  public getBranchLastCommitId(branchName: string) {
+    return child_process.execFileSync('git', ['rev-parse', '--short', branchName]).toString().trim();
+  }
+
+  public isAncestorCommit(c1: string, c2: string) {
+    try {
+      child_process.execFileSync('git', ['merge-base', '--is-ancestor', c1, c2]);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
   public getBranchName() {
     const res = child_process.execFileSync('git', ['branch']).toString().split(os.EOL).find((x) => x.startsWith('*'));
     if (res) {
@@ -95,83 +89,22 @@ export class EnvStatus {
   }
 
   public getBranchType(branch: string): BRANCH_TYPES {
-    if ((/^\d+\.\d+\.\d+$/).test(branch)) {
-      if (this.isValidVersion(branch)) {
-        return BRANCH_TYPES.ITERATION;
-      } else {
-        return BRANCH_TYPES.OTHERS;
-      }
+    if (branch === 'master') {
+      return BRANCH_TYPES.MASTER;
     }
-    if ((/^\d+\.\d+\.\d+-feat-.+$/).test(branch)) {
-      if (this.isValidVersion(branch.split('-')[0])) {
-        return BRANCH_TYPES.ITERATION_FEATURE;
-      } else {
-        return BRANCH_TYPES.OTHERS;
-      }
+    if (branch.startsWith('sprint/')) {
+      return BRANCH_TYPES.ITERATION;
     }
-    if ((/^\d+\.\d+\.\d+-fix-.+$/).test(branch)) {
-      const version = branch.split('-')[0];
-      if (this.isValidVersion(version)) {
-        return BRANCH_TYPES.ITERATION_FIX;
-      } else if (this.isValidVersion(version, true)) {
-        return BRANCH_TYPES.HOTFIX;
-      } else {
-        return BRANCH_TYPES.OTHERS;
-      }
+    if (branch.startsWith('feat/')) {
+      return BRANCH_TYPES.ITERATION_FEATURE;
+    }
+    if (branch.startsWith('fix/')) {
+      return BRANCH_TYPES.ITERATION_FIX;
+    }
+    if (branch.startsWith('hotfix/')) {
+      return BRANCH_TYPES.HOTFIX;
     }
     return BRANCH_TYPES.OTHERS;
-  }
-
-  public getVersionFromPackage(): string {
-    return require(path.resolve('package.json')).version;
-  }
-
-  public getOriginBranchVersion(branch: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      child_process.execFile('git', ['fetch', 'origin', branch], (err) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        try {
-          const m = child_process.execFileSync('git', ['diff', `origin/${branch}`, 'package.json']).toString().match(/-\s*"version":\s*"(.*?)"/);
-          if (m) {
-            resolve(m[1]);
-          } else {
-            resolve(this.getVersionFromPackage());
-          }
-        } catch (err) {
-          reject(err);
-        }
-      });
-    });
-  }
-
-  public getVersionFromBranchName(branch: string) {
-    if (this.getBranchType(branch) !== BRANCH_TYPES.OTHERS) {
-      return branch.split('-')[0];
-    } else {
-      return '';
-    }
-  }
-
-  public compareVersion(a: string, b: string) {
-    const r = /^\d+\.\d+\.\d+$/;
-    if (!r.test(a) || !r.test(b)) {
-      return 9;
-    }
-    const aArr = a.split('.');
-    const bArr = b.split('.');
-    for (let i = 0, l = aArr.length; i < l; i++) {
-      const ai = parseInt(aArr[i], 10);
-      const bi = parseInt(bArr[i], 10);
-      if (ai > bi) {
-        return 1;
-      } else if (ai < bi) {
-        return -1;
-      }
-    }
-    return 0;
   }
 
   public setEnvDataCache(env: string, data: IEnvData) {
@@ -220,41 +153,19 @@ export class EnvStatus {
       const envData: any = envsData[2];
       const stgData: any = envsData[1];
       const prdData: any = envsData[0];
-      if (!envData.version) {
-        return false;
-      }
-      if (envData.env === 'production') {
-        return true;
-      } else if (envData.env === 'staging') {
-        if (this.compareVersion(envData.version, prdData.version) === 1) {
-          return false;
-        } else {
-          return true;
-        }
-      } else {
-        let compareRes = this.compareVersion(envData.version, stgData.version);
-        if (compareRes === 1) {
-          return false;
-        } else if (compareRes === 0) {
+      return this.fetchOrigin().then(() => {
+        if (envData.env === 'production') {
           return true;
         } else {
-          compareRes = this.compareVersion(envData.version, prdData.version);
-          if (compareRes === 1) {
-            return false;
-          } else if (compareRes === 0) {
+          if (this.isAncestorCommit(envData.commit, prdData.commit)) {
             return true;
+          } else if (envData.env === 'staging') {
+            return false;
           } else {
-            return this.fetchOrigin().then(() => {
-              try {
-                child_process.execFileSync('git', ['merge-base', '--is-ancestor', envData.commit, prdData.commit]);
-                return true;
-              } catch (err) {
-                return false;
-              }
-            });
+            return this.isAncestorCommit(envData.commit, stgData.commit);
           }
         }
-      }
+      });
     });
   }
 }
