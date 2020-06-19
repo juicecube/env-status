@@ -8,9 +8,9 @@ export class Runner {
 
   public run(): Promise<number> {
     const args = this.envStatus.getArgs(process.argv);
-    const targetBranchName = args[1];
+    const targetBranchName = args[1] || '';
     const targetBranchType = this.envStatus.getBranchType(targetBranchName);
-    const branchName = args[0];
+    const branchName = args[0] || '';
     const branchType = this.envStatus.getBranchType(branchName);
 
     return this.envStatus.fetchOrigin().then(() => {

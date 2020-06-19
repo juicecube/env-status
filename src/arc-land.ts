@@ -14,7 +14,7 @@ export class Runner {
       return Promise.resolve(20);
     }
 
-    const targetBranchName = args[1];
+    const targetBranchName = args[1] || '';
     const targetBranchType = this.envStatus.getBranchType(targetBranchName);
     const branchName = this.envStatus.getBranchName();
     const branchType = this.envStatus.getBranchType(branchName);
