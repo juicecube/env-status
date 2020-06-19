@@ -3,7 +3,15 @@
 [![CircleCI](https://circleci.com/gh/webyom/env-status.svg?style=svg)](https://circleci.com/gh/webyom/env-status)
 [![codecov](https://codecov.io/gh/webyom/env-status/branch/master/graph/badge.svg)](https://codecov.io/gh/webyom/env-status)
 
-A command to show each env status, whether it is using for testing or available for using.
+This package includes below features:
+
+* Command for showing each env status, whether it is using for testing or available for using.
+* Commands for easing arc diff and arc land.
+* Command for identifying whether a source branch can be merged into a target branch.
+
+Recommended git flow as below:
+
+![npx -p env-status env-status staging](https://raw.githubusercontent.com/webyom/env-status/master/img/gitflow.png)
 
 ## Setup
 
@@ -31,7 +39,6 @@ A command to show each env status, whether it is using for testing or available 
 
   ```json
   {
-    "version": "1.1.0",
     "branch": "master",
     "commit": "17f53ca090d44fd89f805425dee8f21a801a967d",
     "author": "webyom <webyom@gmail.com>",
@@ -39,7 +46,6 @@ A command to show each env status, whether it is using for testing or available 
   }
   ```
 
-  - `version` is the version defined in package.json
   - `branch` is the branch you checkout when you publish your project.
   - `commit` is the the HEAD commit hash when you publish your project.
   - `author` is the HEAD commit author when you publish your project.
@@ -61,9 +67,9 @@ A command to show each env status, whether it is using for testing or available 
 
   `npx -p env-status env-status --gen` will generate the json file for publishing.
 
-- **env-status-version-validate**
+- **merge-validate**
 
-  Validate whether package version is consistant with version in branch name, config this command as your git hook.
+  Validate whether a source branch can be merged into target branch.
 
 - **arc-diff**
 
@@ -94,22 +100,6 @@ A command to show each env status, whether it is using for testing or available 
 - **getBranchType(branch: string): string**
 
   Return branch type, refer to `BRANCH_TYPES` for full possible value list.
-
-- **getOriginBranchVersion(branch: string): Promise\<string\>**
-
-  Return a promise of version string of the given branch name in origin.
-
-- **getVersionFromBranchName(branch: string): string**
-
-  Return a version string if the given branch name contains version.
-
-- **compareVersion(v1: string, v2: string): number**
-
-  Return value:
-  - `1` - v1 > v2
-  - `0` - v1 == v2
-  - `-1` - v1 < v2
-  - `9` - v1 or v2 is invalid version
 
 - **fetchEnvData(env: string): Promise\<object\>**
 
@@ -149,14 +139,15 @@ A command to show each env status, whether it is using for testing or available 
 - **BRANCH_TYPES**
   ```javascript
   {
-    ITERATION: 'ITERATION', // x.x.0
-    ITERATION_FEATURE: 'ITERATION_FEATURE', // x.x.0-feat-xxx
-    ITERATION_FIX: 'ITERATION_FIX', // x.x.0-fix-xxx
-    HOTFIX: 'HOTFIX', // x.x.y-fix-xxx, y > 0
+    SPRINT: 'SPRINT', // sprint/xxx
+    SPRINT_FEATURE: 'SPRINT_FEATURE', // feat/xxx
+    SPRINT_FIX: 'SPRINT_FIX', // fix/xxx
+    HOTFIX: 'HOTFIX', // hotfix/xxx
+    MASTER: 'MASTER', // master
     OTHERS: 'OTHERS'
   }
   ```
 
 ## How to identify an env is available or using
 
-If the env version is less or equal to production version, then it is available, else if env is not staging and env version is equal to staging version, then it is available, else it is using.
+![npx -p env-status env-status staging](https://raw.githubusercontent.com/webyom/env-status/master/img/status-rule.png)

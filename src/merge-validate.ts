@@ -18,15 +18,15 @@ export class Runner {
       const targetBranchCommit = this.envStatus.getBranchLastCommitId('origin/' + targetBranchName);
 
       if (
-        (branchType === BRANCH_TYPES.ITERATION || branchType === BRANCH_TYPES.HOTFIX)
+        (branchType === BRANCH_TYPES.SPRINT || branchType === BRANCH_TYPES.HOTFIX)
         && targetBranchType !== BRANCH_TYPES.MASTER
       ) {
         console.log(chalk.red('Sprint and hotfix branch must be merged into master branch.'));
         return 1;
       }
       if (
-        (branchType === BRANCH_TYPES.ITERATION_FEATURE || branchType === BRANCH_TYPES.ITERATION_FIX)
-        && targetBranchType !== BRANCH_TYPES.ITERATION
+        (branchType === BRANCH_TYPES.SPRINT_FEATURE || branchType === BRANCH_TYPES.SPRINT_FIX)
+        && targetBranchType !== BRANCH_TYPES.SPRINT
       ) {
         console.log(chalk.red('Feature and fix branch must be merged into sprint branch.'));
         return 2;

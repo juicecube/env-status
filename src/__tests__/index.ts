@@ -177,16 +177,16 @@ describe('getBranchName', () => {
 });
 
 describe('getBranchType', () => {
-  test('sprint/xxx is ITERATION', () => {
-    expect(envStatus.getBranchType('sprint/xxx')).toEqual(BRANCH_TYPES.ITERATION);
+  test('sprint/xxx is SPRINT', () => {
+    expect(envStatus.getBranchType('sprint/xxx')).toEqual(BRANCH_TYPES.SPRINT);
   });
 
-  test('feat/xxx is ITERATION_FEATURE', () => {
-    expect(envStatus.getBranchType('feat/xxx')).toEqual(BRANCH_TYPES.ITERATION_FEATURE);
+  test('feat/xxx is SPRINT_FEATURE', () => {
+    expect(envStatus.getBranchType('feat/xxx')).toEqual(BRANCH_TYPES.SPRINT_FEATURE);
   });
 
-  test('fix/xxx is ITERATION_FIX', () => {
-    expect(envStatus.getBranchType('fix/xxx')).toEqual(BRANCH_TYPES.ITERATION_FIX);
+  test('fix/xxx is SPRINT_FIX', () => {
+    expect(envStatus.getBranchType('fix/xxx')).toEqual(BRANCH_TYPES.SPRINT_FIX);
   });
 
   test('hotfix/xxx is HOTFIX', () => {

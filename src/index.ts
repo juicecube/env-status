@@ -93,13 +93,13 @@ export class EnvStatus {
       return BRANCH_TYPES.MASTER;
     }
     if (branch.startsWith('sprint/')) {
-      return BRANCH_TYPES.ITERATION;
+      return BRANCH_TYPES.SPRINT;
     }
     if (branch.startsWith('feat/')) {
-      return BRANCH_TYPES.ITERATION_FEATURE;
+      return BRANCH_TYPES.SPRINT_FEATURE;
     }
     if (branch.startsWith('fix/')) {
-      return BRANCH_TYPES.ITERATION_FIX;
+      return BRANCH_TYPES.SPRINT_FIX;
     }
     if (branch.startsWith('hotfix/')) {
       return BRANCH_TYPES.HOTFIX;
