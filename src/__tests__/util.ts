@@ -1,10 +1,17 @@
 import * as ora from 'ora';
+import { EnvStatus } from '../index';
 import { IEnvData } from '../interfaces';
+
+export function mockFetchOrigin(envStatus: EnvStatus) {
+  const spy = jest.spyOn(envStatus, 'fetchOrigin').mockImplementation(() => Promise.resolve());
+  return () => {
+    spy.mockRestore();
+  };
+}
 
 export function mockEnvData(data: any): IEnvData {
   return Object.assign({
     env: '',
-    version: '',
     branch: '',
     commit: '',
     author: '',

@@ -28,11 +28,10 @@ describe('config', () => {
   });
 
   test('file not exist', () => {
-    const spy = jest.spyOn(path, 'resolve').mockImplementationOnce((...args) => {
+    jest.spyOn(path, 'resolve').mockImplementationOnce((...args) => {
       return '';
     });
     expect(envStatus.getConfig()).toEqual(null);
-    spy.mockRestore();
   });
 
   test('setConfig called in first getConfig, not called in sencond getConfig', () => {
@@ -53,7 +52,7 @@ describe('getArgs', () => {
 
 describe('fetchOrigin', () => {
   test('success', () => {
-    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
+    jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
       expect(args[0]).toEqual('git');
       expect(args[1]).toEqual(['fetch', 'origin']);
       expect(typeof args[2]).toEqual('function');
@@ -61,49 +60,46 @@ describe('fetchOrigin', () => {
       return 0 as any;
     });
     return envStatus.fetchOrigin().then(() => {
-      spy.mockRestore();
+      //
     });
   });
 
   test('throw error', () => {
-    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
+    jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
       setImmediate(() => (args[2] as (err: Error) => void)(new Error('error')));
       return 0 as any;
     });
     return envStatus.fetchOrigin().catch((err: Error) => {
       expect(err.message).toEqual('error');
-      spy.mockRestore();
     });
   });
 
   test('cached success promise', () => {
-    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
+    jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
       setImmediate(args[2] as () => void);
       return 0 as any;
     });
     const promise = envStatus.fetchOrigin();
     return promise.then(() => {
       expect(promise === envStatus.fetchOrigin()).toBeTruthy();
-      spy.mockRestore();
     });
   });
 
   test('not cache failed promise', () => {
-    const spy = jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
+    jest.spyOn(child_process, 'execFile').mockImplementationOnce((...args) => {
       setImmediate(() => (args[2] as (err: Error) => void)(new Error('error')));
       return 0 as any;
     });
     const promise = envStatus.fetchOrigin();
     return promise.catch(() => {
       expect(promise !== envStatus.fetchOrigin()).toBeTruthy();
-      spy.mockRestore();
     });
   });
 });
 
 describe('getLastCommit', () => {
   test('success', () => {
-    const spy = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
+    jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
       expect(args[0]).toEqual('git');
       expect(args[1]).toEqual(['show', '--stat', '--format={"commit": "%h", "author": "%an", "branch": "%d"}|||']);
       return Buffer.from('{"commit": "282d4e2", "author": "webyom", "branch": " (HEAD -> master, 1.0.0)"}|||');
@@ -112,76 +108,97 @@ describe('getLastCommit', () => {
     const res = envStatus.getLastCommit(now);
     expect(res.branch).toEqual('1.0.0');
     expect(res.date).toEqual(now.getTime());
-    spy.mockRestore();
   });
 
   test('get from file', () => {
-    const spy = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
+    jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
       throw new Error('error');
     });
-    const spy2 = jest.spyOn(fs, 'readFileSync').mockImplementationOnce((...args) => {
+    jest.spyOn(fs, 'readFileSync').mockImplementationOnce((...args) => {
       expect(args[0]).toEqual('last-commit.txt');
       return '{"commit": "282d4e2", "author": "webyom", "branch": " (HEAD -> master, 1.0.0)"}|||';
     });
     const now = new Date();
     const res = envStatus.getLastCommit(now);
     expect(res.branch).toEqual('1.0.0');
-    spy.mockRestore();
-    spy2.mockRestore();
+  });
+});
+
+describe('getBranchLastCommitId', () => {
+  test('success', () => {
+    jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
+      expect(args[0]).toEqual('git');
+      expect(args[1]).toEqual(['rev-parse', '--short', 'master']);
+      return Buffer.from('282d4e2');
+    });
+    const res = envStatus.getBranchLastCommitId('master');
+    expect(res).toEqual('282d4e2');
+  });
+});
+
+describe('isAncestorCommit', () => {
+  test('return true if exec git command success', () => {
+    jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
+      expect(args[0]).toEqual('git');
+      expect(args[1]).toEqual(['merge-base', '--is-ancestor', 'a', 'b']);
+      return Buffer.from('');
+    });
+    const res = envStatus.isAncestorCommit('a', 'b');
+    expect(res).toEqual(true);
+  });
+
+  test('return false if exec git command fail', () => {
+    jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
+      expect(args[0]).toEqual('git');
+      expect(args[1]).toEqual(['merge-base', '--is-ancestor', 'a', 'b']);
+      throw new Error('error');
+    });
+    const res = envStatus.isAncestorCommit('a', 'b');
+    expect(res).toEqual(false);
   });
 });
 
 describe('getBranchName', () => {
   test('success', () => {
-    const spy = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
+    jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
       expect(args[0]).toEqual('git');
       expect(args[1]).toEqual(['branch']);
       return Buffer.from('* 1.0.0');
     });
     expect(envStatus.getBranchName()).toEqual('1.0.0');
-    spy.mockRestore();
   });
 
   test('empty return', () => {
-    const spy = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
+    jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
       return Buffer.from('master');
     });
     expect(envStatus.getBranchName()).toEqual('');
-    spy.mockRestore();
   });
 });
 
 describe('getBranchType', () => {
-  test('1.0.0 is ITERATION', () => {
-    expect(envStatus.getBranchType('1.0.0')).toEqual(BRANCH_TYPES.ITERATION);
+  test('sprint/xxx is ITERATION', () => {
+    expect(envStatus.getBranchType('sprint/xxx')).toEqual(BRANCH_TYPES.ITERATION);
   });
 
-  test('1.0.0-feat-xxx is ITERATION_FEATURE', () => {
-    expect(envStatus.getBranchType('1.0.0-feat-xxx')).toEqual(BRANCH_TYPES.ITERATION_FEATURE);
+  test('feat/xxx is ITERATION_FEATURE', () => {
+    expect(envStatus.getBranchType('feat/xxx')).toEqual(BRANCH_TYPES.ITERATION_FEATURE);
   });
 
-  test('1.0.0-fix-xxx is ITERATION_FIX', () => {
-    expect(envStatus.getBranchType('1.0.0-fix-xxx')).toEqual(BRANCH_TYPES.ITERATION_FIX);
+  test('fix/xxx is ITERATION_FIX', () => {
+    expect(envStatus.getBranchType('fix/xxx')).toEqual(BRANCH_TYPES.ITERATION_FIX);
   });
 
-  test('1.0.1-fix-xxx is HOTFIX', () => {
-    expect(envStatus.getBranchType('1.0.1-fix-xxx')).toEqual(BRANCH_TYPES.HOTFIX);
+  test('hotfix/xxx is HOTFIX', () => {
+    expect(envStatus.getBranchType('hotfix/xxx')).toEqual(BRANCH_TYPES.HOTFIX);
   });
 
-  test('master is OTHERS', () => {
-    expect(envStatus.getBranchType('master')).toEqual(BRANCH_TYPES.OTHERS);
+  test('master is MASTER', () => {
+    expect(envStatus.getBranchType('master')).toEqual(BRANCH_TYPES.MASTER);
   });
 
-  test('01.0.0 is OTHERS', () => {
-    expect(envStatus.getBranchType('01.0.0')).toEqual(BRANCH_TYPES.OTHERS);
-  });
-
-  test('01.0.0-feat-xxx is OTHERS', () => {
-    expect(envStatus.getBranchType('01.0.0-feat-xxx')).toEqual(BRANCH_TYPES.OTHERS);
-  });
-
-  test('01.0.0-fix-xxx is OTHERS', () => {
-    expect(envStatus.getBranchType('01.0.0-fix-xxx')).toEqual(BRANCH_TYPES.OTHERS);
+  test('others is OTHERS', () => {
+    expect(envStatus.getBranchType('others')).toEqual(BRANCH_TYPES.OTHERS);
   });
 });
 
@@ -218,75 +235,57 @@ describe('fetchEnvData', () => {
   });
 
   test('fetch error', () => {
-    const spy = jest.spyOn(fetch, 'fetchUrl').mockImplementationOnce((url: string, callback: any) => {
+    jest.spyOn(fetch, 'fetchUrl').mockImplementationOnce((url: string, callback: any) => {
       callback(new Error('error'), {status: 500}, '{}');
     });
     return envStatus.fetchEnvData('dev').then((data: IEnvErrData) => {
-      spy.mockRestore();
       expect(data.err).toEqual(FETCH_ERR.LOAD_ERROR);
     });
   });
 
   test('fetch 404', () => {
-    const spy = jest.spyOn(fetch, 'fetchUrl').mockImplementationOnce((url: string, callback: any) => {
+    jest.spyOn(fetch, 'fetchUrl').mockImplementationOnce((url: string, callback: any) => {
       callback(null, {status: 404}, '{}');
     });
     return envStatus.fetchEnvData('dev').then((data: IEnvErrData) => {
-      spy.mockRestore();
       expect(data.err).toEqual(FETCH_ERR.LOAD_ERROR);
     });
   });
 
   test('parse body error', () => {
-    const spy = jest.spyOn(fetch, 'fetchUrl').mockImplementationOnce((url: string, callback: any) => {
+    jest.spyOn(fetch, 'fetchUrl').mockImplementationOnce((url: string, callback: any) => {
       callback(null, {status: 200}, '{data}');
     });
     return envStatus.fetchEnvData('dev').then((data: IEnvErrData) => {
-      spy.mockRestore();
       expect(data.err).toEqual(FETCH_ERR.PARSE_RESPONSE_ERROR);
     });
   });
 
   test('config undefined', () => {
-    const spy = jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
+    jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
       return null;
     });
     return envStatus.fetchEnvData('dev').then((data: IEnvErrData) => {
-      spy.mockRestore();
       expect(data.err).toEqual(FETCH_ERR.CONFIG_UNDEFINED);
     });
   });
 
   test('url function undefined', () => {
-    const spy = jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
+    jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
       const res: any = {url: ''};
       return res;
     });
     return envStatus.fetchEnvData('dev').then((data: IEnvErrData) => {
-      spy.mockRestore();
       expect(data.err).toEqual(FETCH_ERR.URL_FUNCTION_UNDEFINED);
     });
   });
 });
 
 describe('isEnvAvailable', () => {
-  test('not available without version', () => {
-    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
-      return Promise.resolve(mockEnvData({
-        env,
-      }));
-    });
-    return envStatus.isEnvAvailable('production').then((res) => {
-      expect(res).toBe(false);
-      spy.mockRestore();
-    });
-  });
-
   test('production is always available', () => {
     const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
       return Promise.resolve(mockEnvData({
         env,
-        version: '1.0.0',
       }));
     });
     return envStatus.isEnvAvailable('production').then((res) => {
@@ -295,123 +294,84 @@ describe('isEnvAvailable', () => {
     });
   });
 
-  test('staging is not available when version > production', () => {
+  test('env is available when env commit is ancestor of production commit', () => {
     const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
       return Promise.resolve(mockEnvData({
         env,
-        version: env === 'staging' ? '1.0.1' : '1.0.0',
       }));
     });
-    return envStatus.isEnvAvailable('staging').then((res) => {
-      expect(res).toBe(false);
-      spy.mockRestore();
+    const spy2 = jest.spyOn(envStatus, 'isAncestorCommit').mockImplementation((c1, c2) => {
+      return true;
     });
-  });
-
-  test('staging is available when version <= production', () => {
-    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
-      return Promise.resolve(mockEnvData({
-        env,
-        version: env === 'staging' ? '1.0.0' : '1.0.1',
-      }));
-    });
-    return envStatus.isEnvAvailable('staging').then((res) => {
+    return envStatus.isEnvAvailable('sprint/xxx').then((res) => {
       expect(res).toBe(true);
-      spy.mockRestore();
-    });
-  });
-
-  test('env is not available when version > staging', () => {
-    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
-      return Promise.resolve(mockEnvData({
-        env,
-        version: env === 'dev' ? '1.0.1' : '1.0.0',
-      }));
-    });
-    return envStatus.isEnvAvailable('dev').then((res) => {
-      expect(res).toBe(false);
-      spy.mockRestore();
-    });
-  });
-
-  test('env is available when version == staging', () => {
-    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
-      return Promise.resolve(mockEnvData({
-        env,
-        version: '1.0.0',
-      }));
-    });
-    return envStatus.isEnvAvailable('dev').then((res) => {
-      expect(res).toBe(true);
-      spy.mockRestore();
-    });
-  });
-
-  test('env is not available when version < staging and version > production', () => {
-    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
-      return Promise.resolve(mockEnvData({
-        env,
-        version: env === 'dev' ? '1.0.1' : env === 'staging' ? '1.1.0' : '1.0.0',
-      }));
-    });
-    return envStatus.isEnvAvailable('dev').then((res) => {
-      expect(res).toBe(false);
-      spy.mockRestore();
-    });
-  });
-
-  test('env is available when version < staging and version == production', () => {
-    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
-      return Promise.resolve(mockEnvData({
-        env,
-        version: env === 'dev' ? '1.0.1' : env === 'staging' ? '1.1.0' : '1.0.1',
-      }));
-    });
-    return envStatus.isEnvAvailable('dev').then((res) => {
-      expect(res).toBe(true);
-      spy.mockRestore();
-    });
-  });
-
-  test('env is available when version < staging and version < production \
-and production head commit is ancestor of env head commit', () => {
-    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
-      return Promise.resolve(mockEnvData({
-        env,
-        version: env === 'dev' ? '1.0.0' : '1.0.1',
-      }));
-    });
-    const spy2 = jest.spyOn(envStatus, 'fetchOrigin').mockImplementationOnce(() => {
-      return Promise.resolve();
-    });
-    const spy3 = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
-      return Buffer.from('');
-    });
-    return envStatus.isEnvAvailable('dev').then((res) => {
-      expect(res).toBe(true);
-      spy3.mockRestore();
       spy2.mockRestore();
       spy.mockRestore();
     });
   });
 
-  test('env is not available when version < staging and version < production \
-and production head commit is not ancestor of env head commit', () => {
+  test('env is available when env commit is ancestor of production commit', () => {
     const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
       return Promise.resolve(mockEnvData({
         env,
-        version: env === 'dev' ? '1.0.0' : '1.0.1',
       }));
     });
-    const spy2 = jest.spyOn(envStatus, 'fetchOrigin').mockImplementationOnce(() => {
-      return Promise.resolve();
+    const spy2 = jest.spyOn(envStatus, 'isAncestorCommit').mockImplementation((c1, c2) => {
+      return true;
     });
-    const spy3 = jest.spyOn(child_process, 'execFileSync').mockImplementationOnce((...args) => {
-      throw new Error('error');
+    return envStatus.isEnvAvailable('sprint/xxx').then((res) => {
+      expect(res).toBe(true);
+      spy2.mockRestore();
+      spy.mockRestore();
     });
-    return envStatus.isEnvAvailable('dev').then((res) => {
+  });
+
+  test('env is available when env commit is not ancestor of production commit \
+but is ancestor of staging commit', () => {
+    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
+      return Promise.resolve(mockEnvData({
+        env,
+        commit: env,
+      }));
+    });
+    const spy2 = jest.spyOn(envStatus, 'isAncestorCommit').mockImplementation((c1, c2) => {
+      return c2 === 'staging';
+    });
+    return envStatus.isEnvAvailable('sprint/xxx').then((res) => {
+      expect(res).toBe(true);
+      spy2.mockRestore();
+      spy.mockRestore();
+    });
+  });
+
+  test('env is not available when env commit is not ancestor of production commit \
+and is not ancestor of staging commit', () => {
+    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
+      return Promise.resolve(mockEnvData({
+        env,
+      }));
+    });
+    const spy2 = jest.spyOn(envStatus, 'isAncestorCommit').mockImplementation((c1, c2) => {
+      return false;
+    });
+    return envStatus.isEnvAvailable('sprint/xxx').then((res) => {
       expect(res).toBe(false);
-      spy3.mockRestore();
+      spy2.mockRestore();
+      spy.mockRestore();
+    });
+  });
+
+  test('staging is not available when staging commit is not ancestor of production commit', () => {
+    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env) => {
+      return Promise.resolve(mockEnvData({
+        env,
+      }));
+    });
+    const spy2 = jest.spyOn(envStatus, 'isAncestorCommit').mockImplementation((c1, c2) => {
+      return false;
+    });
+    return envStatus.isEnvAvailable('staging').then((res) => {
+      expect(res).toBe(false);
       spy2.mockRestore();
       spy.mockRestore();
     });

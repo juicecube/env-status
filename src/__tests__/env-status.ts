@@ -5,7 +5,7 @@ import mockConsole from 'jest-mock-console';
 import { EnvStatus } from '../index';
 import { Runner } from '../env-status';
 import { FETCH_ERR } from '../interfaces';
-import { mockSpinner, mockEnvData } from './util';
+import { mockSpinner, mockEnvData, mockFetchOrigin } from './util';
 
 let envStatus: EnvStatus;
 let spinner: ora.Ora;
@@ -13,6 +13,7 @@ let runner: Runner;
 
 beforeEach(() => {
   envStatus = new EnvStatus();
+  mockFetchOrigin(envStatus);
   spinner = ora();
   runner = new Runner(envStatus, spinner);
 });
@@ -146,16 +147,19 @@ describe('run', () => {
     });
     const spy2 = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env: string) => {
       if (env === 'production') {
-        return Promise.resolve(mockEnvData({env, version: '1.0.0', date: 10}));
+        return Promise.resolve(mockEnvData({env, commit: env, date: 10}));
       } else if (env === 'staging') {
-        return Promise.resolve(mockEnvData({env, version: '1.0.0', date: 5}));
+        return Promise.resolve(mockEnvData({env, commit: env, date: 5}));
       } else if (env === 'dev') {
-        return Promise.resolve(mockEnvData({env, version: '1.1.0', date: 7}));
+        return Promise.resolve(mockEnvData({env, commit: env, date: 7}));
       } else if (env === 'dev1') {
-        return Promise.resolve(mockEnvData({env, version: '1.2.0', date: 7}));
+        return Promise.resolve(mockEnvData({env, commit: env, date: 7}));
       } else {
         return Promise.resolve({env, err: FETCH_ERR.LOAD_ERROR, date: 7});
       }
+    });
+    const spy3 = jest.spyOn(envStatus, 'isAncestorCommit').mockImplementation((c1, c2) => {
+      return c2 === 'staging';
     });
     const consoleRestore = mockConsole();
     const spinnerRestore = mockSpinner(spinner);
@@ -163,6 +167,7 @@ describe('run', () => {
       expect(msg).toBe('');
       spinnerRestore();
       consoleRestore();
+      spy3.mockRestore();
       spy2.mockRestore();
       spy.mockRestore();
     });

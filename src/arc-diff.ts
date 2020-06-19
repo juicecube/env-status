@@ -17,17 +17,21 @@ export class Runner {
       const branchCommit = this.envStatus.getBranchLastCommitId(branchName);
       const targetBranchCommit = this.envStatus.getBranchLastCommitId('origin/' + targetBranchName);
 
-      if (branchType === BRANCH_TYPES.ITERATION || branchType === BRANCH_TYPES.HOTFIX) {
-        if (targetBranchType !== BRANCH_TYPES.MASTER) {
-          console.log(chalk.red('Sprint and hotfix branch must be diffed with master branch.'));
-          return 1;
-        }
-      } else if (branchType === BRANCH_TYPES.ITERATION_FEATURE || branchType === BRANCH_TYPES.ITERATION_FIX) {
-        if (targetBranchType !== BRANCH_TYPES.ITERATION) {
-          console.log(chalk.red('Feature and fix branch must be diffed with sprint branch.'));
-          return 2;
-        }
-      } else {
+      if (
+        (branchType === BRANCH_TYPES.ITERATION || branchType === BRANCH_TYPES.HOTFIX)
+        && targetBranchType !== BRANCH_TYPES.MASTER
+      ) {
+        console.log(chalk.red('Sprint and hotfix branch must be diffed with master branch.'));
+        return 1;
+      }
+      if (
+        (branchType === BRANCH_TYPES.ITERATION_FEATURE || branchType === BRANCH_TYPES.ITERATION_FIX)
+        && targetBranchType !== BRANCH_TYPES.ITERATION
+      ) {
+        console.log(chalk.red('Feature and fix branch must be diffed with sprint branch.'));
+        return 2;
+      }
+      if (branchType === BRANCH_TYPES.MASTER || branchType === BRANCH_TYPES.OTHERS) {
         console.log(chalk.red(`Working branch name "${branchName}" is invalid.`));
         return 3;
       }
