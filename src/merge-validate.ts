@@ -14,9 +14,6 @@ export class Runner {
     const branchType = this.envStatus.getBranchType(branchName);
 
     return this.envStatus.fetchOrigin().then(() => {
-      const branchCommit = this.envStatus.getBranchLastCommitId('origin/' + branchName);
-      const targetBranchCommit = this.envStatus.getBranchLastCommitId('origin/' + targetBranchName);
-
       if (
         (branchType === BRANCH_TYPES.SPRINT || branchType === BRANCH_TYPES.HOTFIX)
         && targetBranchType !== BRANCH_TYPES.MASTER
@@ -36,9 +33,24 @@ export class Runner {
         return 3;
       }
 
+      let branchCommit;
+      let targetBranchCommit;
+      try {
+        branchCommit = this.envStatus.getBranchLastCommitId('origin/' + branchName);
+      } catch (err) {
+        console.log(chalk.red(`Failed to get last commit of "${branchName}".`));
+        return 4;
+      }
+      try {
+        targetBranchCommit = this.envStatus.getBranchLastCommitId('origin/' + targetBranchName);
+      } catch (err) {
+        console.log(chalk.red(`Failed to get last commit of "${targetBranchName}".`));
+        return 5;
+      }
+
       if (!this.envStatus.isAncestorCommit(targetBranchCommit, branchCommit)) {
         console.log(chalk.red(`Please merge lastest commits from "${targetBranchName}" into "${branchName}" first.`));
-        return 4;
+        return 6;
       }
 
       return 0;

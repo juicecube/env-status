@@ -94,6 +94,42 @@ describe('run', () => {
     });
   });
 
+  test('catch error when get source branch last commit', () => {
+    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
+      return ['sprint/xxx', 'master'];
+    });
+    const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation((branchName) => {
+      if (branchName === 'origin/sprint/xxx') {
+        throw new Error('error');
+      }
+      return 'a';
+    });
+    const mockConsoleRestore = mockConsole();
+    return runner.run().then((code: number) => {
+      expect(code).toBe(4);
+      mockConsoleRestore();
+      spy.mockRestore();
+    });
+  });
+
+  test('catch error when get target branch last commit', () => {
+    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
+      return ['sprint/xxx', 'master'];
+    });
+    const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation((branchName) => {
+      if (branchName === 'origin/master') {
+        throw new Error('error');
+      }
+      return 'a';
+    });
+    const mockConsoleRestore = mockConsole();
+    return runner.run().then((code: number) => {
+      expect(code).toBe(5);
+      mockConsoleRestore();
+      spy.mockRestore();
+    });
+  });
+
   test('target branch commit must be ancestor of current branch commit', () => {
     jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
       return ['sprint/xxx', 'master'];
@@ -106,7 +142,7 @@ describe('run', () => {
     });
     const mockConsoleRestore = mockConsole();
     return runner.run().then((code: number) => {
-      expect(code).toBe(4);
+      expect(code).toBe(6);
       mockConsoleRestore();
       spy.mockRestore();
     });
@@ -138,7 +174,6 @@ describe('run', () => {
       return true;
     });
     jest.spyOn(child_process, 'spawnSync').mockImplementationOnce((...args) => {
-      console.log(111, args);
       expect(args[0]).toEqual('arc');
       expect(args[1]).toEqual(['diff', 'master']);
       return 0 as any;
