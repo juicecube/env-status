@@ -10,7 +10,11 @@ let runner: Runner;
 beforeEach(() => {
   envStatus = new EnvStatus();
   mockFetchOrigin(envStatus);
-  runner = new Runner(envStatus);
+  runner = new Runner(envStatus, {
+    _: [],
+    $0: 'arc-land',
+    onto: 'master',
+  });
 });
 
 afterAll(() => {
@@ -19,27 +23,36 @@ afterAll(() => {
 });
 
 describe('run', () => {
+  test('getArgv', () => {
+    expect(runner.getArgv()).toEqual({
+      _: [],
+      $0: 'arc-land',
+      onto: 'master',
+    });
+  });
+
   test('pass --onto argument', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['master'];
-    });
-    jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
-      return 'sprint/xxx';
-    });
-    const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation(() => {
-      return 'a';
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'arc-land',
+        onto: '',
+      };
     });
     const mockConsoleRestore = mockConsole();
     return runner.run().then((code: number) => {
       expect(code).toBe(20);
       mockConsoleRestore();
-      spy.mockRestore();
     });
   });
 
   test('sprint branch must be landed to master branch', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['--onto', 'dev'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'arc-land',
+        onto: 'dev',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'sprint/xxx';
@@ -56,8 +69,12 @@ describe('run', () => {
   });
 
   test('hotfix branch must be landed to master branch', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['--onto', 'dev'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'arc-land',
+        onto: 'dev',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'hotfix/xxx';
@@ -74,8 +91,12 @@ describe('run', () => {
   });
 
   test('feature branch must be landed to sprint branch', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['--onto', 'dev'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'arc-land',
+        onto: 'dev',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'feat/xxx';
@@ -92,8 +113,12 @@ describe('run', () => {
   });
 
   test('fix branch must be landed to sprint branch', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['--onto', 'dev'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'arc-land',
+        onto: 'dev',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'fix/xxx';
@@ -110,8 +135,12 @@ describe('run', () => {
   });
 
   test('working branch name is invalid', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['--onto', 'master'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'arc-land',
+        onto: 'master',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'xxx';
@@ -128,8 +157,12 @@ describe('run', () => {
   });
 
   test('catch error when get source branch last commit', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['--onto', 'master'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'arc-land',
+        onto: 'master',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'sprint/xxx';
@@ -149,8 +182,12 @@ describe('run', () => {
   });
 
   test('catch error when get target branch last commit', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['--onto', 'master'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'arc-land',
+        onto: 'master',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'sprint/xxx';
@@ -170,8 +207,12 @@ describe('run', () => {
   });
 
   test('target branch commit must be ancestor of current branch commit', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['--onto', 'master'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'arc-land',
+        onto: 'master',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'sprint/xxx';
@@ -191,8 +232,12 @@ describe('run', () => {
   });
 
   test('fetch origin fail', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['--onto', 'master'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'arc-land',
+        onto: 'master',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'sprint/xxx';
@@ -212,6 +257,13 @@ describe('run', () => {
   });
 
   test('success', () => {
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'arc-land',
+        onto: 'master',
+      };
+    });
     jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
       return ['--onto', 'master'];
     });

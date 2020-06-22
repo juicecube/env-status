@@ -1,14 +1,25 @@
 import * as child_process from 'child_process';
 import * as chalk from 'chalk';
+import { Arguments } from 'yargs';
 import { EnvStatus } from './index';
 import { BRANCH_TYPES } from './interfaces';
 
 export class Runner {
-  constructor(private envStatus: EnvStatus) {}
+  constructor(private envStatus: EnvStatus, private argv: Arguments) {}
+
+  public getArgv(): Arguments {
+    return this.argv;
+  }
 
   public run(): Promise<number> {
-    const args = this.envStatus.getArgs(process.argv);
-    const targetBranchName = args[0] || '';
+    const argv = this.getArgv();
+    const targetBranchName = argv._[0];
+
+    if (!targetBranchName) {
+      console.log(chalk.red('Please specify source branch and target branch.'));
+      return Promise.resolve(20);
+    }
+
     const targetBranchType = this.envStatus.getBranchType(targetBranchName);
     const branchName = this.envStatus.getBranchName();
     const branchType = this.envStatus.getBranchType(branchName);
@@ -53,7 +64,7 @@ export class Runner {
         return 6;
       }
 
-      child_process.spawnSync('arc', ['diff', ...args], {stdio: 'inherit'});
+      child_process.spawnSync('arc', ['diff', ...this.envStatus.getArgs(process.argv)], {stdio: 'inherit'});
       return 0;
     }).catch(() => {
       console.log(chalk.red('Failed to fetch origin.'));

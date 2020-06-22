@@ -10,7 +10,10 @@ let runner: Runner;
 beforeEach(() => {
   envStatus = new EnvStatus();
   mockFetchOrigin(envStatus);
-  runner = new Runner(envStatus);
+  runner = new Runner(envStatus, {
+    _: [],
+    $0: 'merge-validate',
+  });
 });
 
 afterAll(() => {
@@ -19,9 +22,47 @@ afterAll(() => {
 });
 
 describe('run', () => {
+  test('getArgv', () => {
+    expect(runner.getArgv()).toEqual({
+      _: [],
+      $0: 'merge-validate',
+    });
+  });
+
+  test('should specify target branch', () => {
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['sprint/xxx'],
+        $0: 'merge-validate',
+      };
+    });
+    const mockConsoleRestore = mockConsole();
+    return runner.run().then((code: number) => {
+      expect(code).toBe(20);
+      mockConsoleRestore();
+    });
+  });
+
+  test('should specify source branch', () => {
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['', 'sprint/xxx'],
+        $0: 'merge-validate',
+      };
+    });
+    const mockConsoleRestore = mockConsole();
+    return runner.run().then((code: number) => {
+      expect(code).toBe(20);
+      mockConsoleRestore();
+    });
+  });
+
   test('sprint branch must be merged into master branch', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['sprint/xxx', 'dev'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['sprint/xxx', 'dev'],
+        $0: 'merge-validate',
+      };
     });
     const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation(() => {
       return 'a';
@@ -35,8 +76,11 @@ describe('run', () => {
   });
 
   test('hotfix branch must be merged into master branch', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['hotfix/xxx', 'dev'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['hotfix/xxx', 'dev'],
+        $0: 'merge-validate',
+      };
     });
     const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation(() => {
       return 'a';
@@ -50,8 +94,11 @@ describe('run', () => {
   });
 
   test('feature branch must be merged into sprint branch', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['feat/xxx', 'dev'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['feat/xxx', 'dev'],
+        $0: 'merge-validate',
+      };
     });
     const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation(() => {
       return 'a';
@@ -65,8 +112,11 @@ describe('run', () => {
   });
 
   test('fix branch must be merged into sprint branch', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['fix/xxx', 'dev'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['fix/xxx', 'dev'],
+        $0: 'merge-validate',
+      };
     });
     const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation(() => {
       return 'a';
@@ -80,8 +130,11 @@ describe('run', () => {
   });
 
   test('source branch name is invalid', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['xxx', 'master'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['xxx', 'master'],
+        $0: 'merge-validate',
+      };
     });
     const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation(() => {
       return 'a';
@@ -95,8 +148,11 @@ describe('run', () => {
   });
 
   test('catch error when get source branch last commit', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['sprint/xxx', 'master'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['sprint/xxx', 'master'],
+        $0: 'merge-validate',
+      };
     });
     const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation((branchName) => {
       if (branchName === 'origin/sprint/xxx') {
@@ -113,8 +169,11 @@ describe('run', () => {
   });
 
   test('catch error when get target branch last commit', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['sprint/xxx', 'master'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['sprint/xxx', 'master'],
+        $0: 'merge-validate',
+      };
     });
     const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation((branchName) => {
       if (branchName === 'origin/master') {
@@ -131,8 +190,11 @@ describe('run', () => {
   });
 
   test('target branch commit must be ancestor of current branch commit', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['sprint/xxx', 'master'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['sprint/xxx', 'master'],
+        $0: 'merge-validate',
+      };
     });
     jest.spyOn(envStatus, 'isAncestorCommit').mockImplementationOnce(() => {
       return false;
@@ -149,8 +211,11 @@ describe('run', () => {
   });
 
   test('fetch origin fail', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['sprint/xxx', 'master'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['sprint/xxx', 'master'],
+        $0: 'merge-validate',
+      };
     });
     jest.spyOn(envStatus, 'fetchOrigin').mockImplementationOnce(() => {
       return Promise.reject();
@@ -167,8 +232,11 @@ describe('run', () => {
   });
 
   test('success', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['sprint/xxx', 'master'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['sprint/xxx', 'master'],
+        $0: 'merge-validate',
+      };
     });
     jest.spyOn(envStatus, 'isAncestorCommit').mockImplementationOnce(() => {
       return true;

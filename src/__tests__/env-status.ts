@@ -15,7 +15,12 @@ beforeEach(() => {
   envStatus = new EnvStatus();
   mockFetchOrigin(envStatus);
   spinner = ora();
-  runner = new Runner(envStatus, spinner);
+  runner = new Runner(envStatus, {
+    _: [],
+    $0: 'env-status',
+    init: false,
+    gen: false,
+  }, spinner);
 });
 
 afterAll(() => {
@@ -25,93 +30,108 @@ afterAll(() => {
 });
 
 describe('run', () => {
+  test('getArgv', () => {
+    expect(runner.getArgv()).toEqual({
+      _: [],
+      $0: 'env-status',
+      init: false,
+      gen: false,
+    });
+  });
+
   test('--init config allreay exist', () => {
-    const spy = jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['--init'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'env-status',
+        init: true,
+        gen: false,
+      };
     });
     const consoleRestore = mockConsole();
     return runner.run().then((msg: string) => {
       expect(msg).toBe(Runner.MESSAGES.CONFIG_ALLREADY_EXIST);
       consoleRestore();
-      spy.mockRestore();
     });
   });
 
   test('--init config file created', () => {
-    const spy = jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['--init'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'env-status',
+        init: true,
+        gen: false,
+      };
     });
-    const spy2 = jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
+    jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
       return null;
     });
     const consoleRestore = mockConsole();
     return runner.run().then((msg: string) => {
       expect(msg).toBe(Runner.MESSAGES.CONFIG_FILE_CREATED);
       consoleRestore();
-      spy2.mockRestore();
-      spy.mockRestore();
     });
   });
 
   test('--gen success', () => {
-    const spy = jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['--gen'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'env-status',
+        init: false,
+        gen: true,
+      };
     });
-    const spy2 = jest.spyOn(fs, 'writeFileSync');
+    const spy = jest.spyOn(fs, 'writeFileSync');
     const consoleRestore = mockConsole();
     return runner.run().then((msg: string) => {
       expect(msg).toBe(Runner.MESSAGES.COMMIT_LOG_GENERATED);
       consoleRestore();
-      spy2.mockRestore();
       spy.mockRestore();
     });
   });
 
   test('--gen without config success', () => {
-    const spy = jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['--gen'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'env-status',
+        init: false,
+        gen: true,
+      };
     });
-    const spy2 = jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
+    jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
       return null;
     });
     const consoleRestore = mockConsole();
     return runner.run().then((msg: string) => {
       expect(msg).toBe(Runner.MESSAGES.COMMIT_LOG_GENERATED);
       consoleRestore();
-      spy2.mockRestore();
-      spy.mockRestore();
-    });
-  });
-
-  test('--version success', () => {
-    const spy = jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['--version'];
-    });
-    const consoleRestore = mockConsole();
-    return runner.run().then((msg: string) => {
-      expect(msg).toBe(require(path.resolve(__dirname, '../../package.json')).version);
-      consoleRestore();
-      spy.mockRestore();
     });
   });
 
   test('spinner fail with no config', () => {
-    const spy = jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
+    jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
       return null;
     });
     const spinnerRestore = mockSpinner(spinner);
     return runner.run().then((msg: string) => {
       expect(msg).toBe(Runner.MESSAGES.SPINNER_FAIL_NO_CONFIG);
       spinnerRestore();
-      spy.mockRestore();
     });
   });
 
   test('spinner fail no evn defined', () => {
-    const spy = jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['dev'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['dev'],
+        $0: 'env-status',
+        init: false,
+        gen: false,
+      };
     });
-    const spy2 = jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
+    jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
       const res: any = {envs: []};
       return res;
     });
@@ -119,16 +139,19 @@ describe('run', () => {
     return runner.run().then((msg: string) => {
       expect(msg).toBe(Runner.MESSAGES.SPINNER_FAIL_REQUESTED_ENV_UNDEFINED);
       spinnerRestore();
-      spy2.mockRestore();
-      spy.mockRestore();
     });
   });
 
   test('spinner fail requested env undefined', () => {
-    const spy = jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['dev'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['dev'],
+        $0: 'env-status',
+        init: false,
+        gen: false,
+      };
     });
-    const spy2 = jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
+    jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
       const res: any = {envs: ['staging', 'production']};
       return res;
     });
@@ -136,16 +159,19 @@ describe('run', () => {
     return runner.run().then((msg: string) => {
       expect(msg).toBe(Runner.MESSAGES.SPINNER_FAIL_REQUESTED_ENV_UNDEFINED);
       spinnerRestore();
-      spy2.mockRestore();
-      spy.mockRestore();
     });
   });
 
   test('success', () => {
-    const spy = jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return [];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [''],
+        $0: 'env-status',
+        init: false,
+        gen: false,
+      };
     });
-    const spy2 = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env: string) => {
+    const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env: string) => {
       if (env === 'production') {
         return Promise.resolve(mockEnvData({env, commit: env, date: 10}));
       } else if (env === 'staging') {
@@ -158,7 +184,7 @@ describe('run', () => {
         return Promise.resolve({env, err: FETCH_ERR.LOAD_ERROR, date: 7});
       }
     });
-    const spy3 = jest.spyOn(envStatus, 'isAncestorCommit').mockImplementation((c1, c2) => {
+    const spy2 = jest.spyOn(envStatus, 'isAncestorCommit').mockImplementation((c1, c2) => {
       return c2 === 'staging';
     });
     const consoleRestore = mockConsole();
@@ -167,7 +193,6 @@ describe('run', () => {
       expect(msg).toBe('');
       spinnerRestore();
       consoleRestore();
-      spy3.mockRestore();
       spy2.mockRestore();
       spy.mockRestore();
     });

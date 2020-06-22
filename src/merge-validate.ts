@@ -1,16 +1,26 @@
-import * as child_process from 'child_process';
 import * as chalk from 'chalk';
+import { Arguments } from 'yargs';
 import { EnvStatus } from './index';
 import { BRANCH_TYPES } from './interfaces';
 
 export class Runner {
-  constructor(private envStatus: EnvStatus) {}
+  constructor(private envStatus: EnvStatus, private argv: Arguments) {}
+
+  public getArgv(): Arguments {
+    return this.argv;
+  }
 
   public run(): Promise<number> {
-    const args = this.envStatus.getArgs(process.argv);
-    const targetBranchName = args[1] || '';
+    const argv = this.getArgv();
+    const targetBranchName = argv._[1] || '';
+    const branchName = argv._[0] || '';
+
+    if (!branchName || !targetBranchName) {
+      console.log(chalk.red('Please specify source branch and target branch.'));
+      return Promise.resolve(20);
+    }
+
     const targetBranchType = this.envStatus.getBranchType(targetBranchName);
-    const branchName = args[0] || '';
     const branchType = this.envStatus.getBranchType(branchName);
 
     return this.envStatus.fetchOrigin().then(() => {

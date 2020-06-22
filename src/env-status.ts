@@ -5,8 +5,14 @@ import * as mkdirp from 'mkdirp';
 import * as moment from 'moment';
 import * as ora from 'ora';
 import * as path from 'path';
+import { Arguments } from 'yargs';
 import { EnvStatus } from './index';
 import { IEnvData, isEnvErrDataType } from './interfaces';
+
+interface IEnvStatusArgv {
+  init: boolean;
+  gen: boolean;
+}
 
 export class Runner {
   public static MESSAGES = {
@@ -19,14 +25,18 @@ export class Runner {
     SPINNER_LOADING_ENV_DATA: 'Loading envs data',
   };
 
-  constructor(private envStatus: EnvStatus, private spinner: ora.Ora) {}
+  constructor(private envStatus: EnvStatus, private argv: Arguments<IEnvStatusArgv>, private spinner: ora.Ora) {}
+
+  public getArgv(): Arguments<IEnvStatusArgv> {
+    return this.argv;
+  }
 
   public run(): Promise<string> {
+    const argv = this.getArgv();
     const config = this.envStatus.getConfig();
-    const args = this.envStatus.getArgs(process.argv);
-    const requestEnv = args[0];
+    const requestEnv = argv._[0];
 
-    if (requestEnv === '--init') {
+    if (argv.init) {
       if (config) {
         console.log(Runner.MESSAGES.CONFIG_ALLREADY_EXIST);
         return Promise.resolve(Runner.MESSAGES.CONFIG_ALLREADY_EXIST);
@@ -38,7 +48,7 @@ export class Runner {
       }
     }
 
-    if (requestEnv === '--gen') {
+    if (argv.gen) {
       const data = this.envStatus.getLastCommit(new Date());
 
       const outputPath = path.resolve(config && config.gen || 'dist/env-status.json');
@@ -46,12 +56,6 @@ export class Runner {
       fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
       console.log(Runner.MESSAGES.COMMIT_LOG_GENERATED);
       return Promise.resolve(Runner.MESSAGES.COMMIT_LOG_GENERATED);
-    }
-
-    if (requestEnv === '--version') {
-      const version = this.getPackageVersion();
-      console.log(version);
-      return Promise.resolve(version);
     }
 
     const spinner = this.spinner;
@@ -122,10 +126,6 @@ export class Runner {
     } else {
       return 30;
     }
-  }
-
-  private getPackageVersion(): string {
-    return require(path.resolve(__dirname, '../package.json')).version;
   }
 
   private getEnvListForPrint(envs: string[], requestEnv?: string): string[] {

@@ -10,7 +10,10 @@ let runner: Runner;
 beforeEach(() => {
   envStatus = new EnvStatus();
   mockFetchOrigin(envStatus);
-  runner = new Runner(envStatus);
+  runner = new Runner(envStatus, {
+    _: [],
+    $0: 'arc-diff',
+  });
 });
 
 afterAll(() => {
@@ -19,9 +22,33 @@ afterAll(() => {
 });
 
 describe('run', () => {
+  test('getArgv', () => {
+    expect(runner.getArgv()).toEqual({
+      _: [],
+      $0: 'arc-diff',
+    });
+  });
+
+  test('should specify target branch', () => {
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'arc-diff',
+      };
+    });
+    const mockConsoleRestore = mockConsole();
+    return runner.run().then((code: number) => {
+      expect(code).toBe(20);
+      mockConsoleRestore();
+    });
+  });
+
   test('sprint branch must be diffed with master branch', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['dev'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['dev'],
+        $0: 'arc-diff',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'sprint/xxx';
@@ -38,8 +65,11 @@ describe('run', () => {
   });
 
   test('hotfix branch must be diffed with master branch', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['dev'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['dev'],
+        $0: 'arc-diff',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'hotfix/xxx';
@@ -56,8 +86,11 @@ describe('run', () => {
   });
 
   test('feature branch must be diffed with sprint branch', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['dev'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['dev'],
+        $0: 'arc-diff',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'feat/xxx';
@@ -74,8 +107,11 @@ describe('run', () => {
   });
 
   test('fix branch must be diffed with sprint branch', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['dev'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['dev'],
+        $0: 'arc-diff',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'fix/xxx';
@@ -92,8 +128,11 @@ describe('run', () => {
   });
 
   test('working branch name is invalid', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['master'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['master'],
+        $0: 'arc-diff',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'xxx';
@@ -110,8 +149,11 @@ describe('run', () => {
   });
 
   test('catch error when get source branch last commit', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['master'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['master'],
+        $0: 'arc-diff',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'sprint/xxx';
@@ -131,8 +173,11 @@ describe('run', () => {
   });
 
   test('catch error when get target branch last commit', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['master'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['master'],
+        $0: 'arc-diff',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'sprint/xxx';
@@ -152,8 +197,11 @@ describe('run', () => {
   });
 
   test('target branch commit must be ancestor of current branch commit', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['master'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['master'],
+        $0: 'arc-diff',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'sprint/xxx';
@@ -173,8 +221,11 @@ describe('run', () => {
   });
 
   test('fetch origin fail', () => {
-    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
-      return ['master'];
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['master'],
+        $0: 'arc-diff',
+      };
     });
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'sprint/xxx';
@@ -194,6 +245,12 @@ describe('run', () => {
   });
 
   test('success', () => {
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['master'],
+        $0: 'arc-diff',
+      };
+    });
     jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
       return ['master'];
     });
