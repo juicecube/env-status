@@ -1,6 +1,6 @@
 {
   "name": "env-status",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A command to show each env status, whether it is using for testing or available for using.",
   "keywords": [
     "env",
@@ -52,7 +52,8 @@
     "fetch": "^1.1.0",
     "mkdirp": "^0.5.1",
     "moment": "^2.24.0",
-    "ora": "^3.4.0"
+    "ora": "^3.4.0",
+    "yargs": "^15.3.1"
   },
   "devDependencies": {
     "@types/jest": "^24.0.18",
@@ -65,7 +66,6 @@
     "jest-mock-process": "^1.2.0",
     "ts-jest": "^24.0.2",
     "tslint": "^5.19.0",
-    "typescript": "^3.6.2",
-    "yargs": "^15.3.1"
+    "typescript": "^3.6.2"
   }
 }
