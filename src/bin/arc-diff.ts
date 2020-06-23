@@ -4,7 +4,7 @@ import { EnvStatus } from '../index';
 import { Runner } from '../arc-diff';
 
 const argv = yargs.scriptName('arc-diff')
-  .usage('$0 targetBranch')
+  .usage('$0 <target-branch>')
   .help()
   .argv;
 

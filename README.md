@@ -55,29 +55,35 @@ Recommended git flow as below:
 
 - **env-status**
 
-  `npx -p env-status env-status` will show all the env status
+  `env-status` will show all the env status
 
-  ![npx -p env-status env-status](https://raw.githubusercontent.com/webyom/env-status/master/img/result-1.png)
+  ![env-status](https://raw.githubusercontent.com/webyom/env-status/master/img/result-1.png)
 
-  `npx -p env-status env-status staging` will show staging and production (if defined) status
+  `env-status staging` will show staging and production (if defined) status
 
-  ![npx -p env-status env-status staging](https://raw.githubusercontent.com/webyom/env-status/master/img/result-2.png)
+  ![env-status staging](https://raw.githubusercontent.com/webyom/env-status/master/img/result-2.png)
 
-  `npx -p env-status env-status --init` will create `.envstatus.js` config file in your project root.
+  `env-status --init` will create `.envstatus.js` config file in your project root.
 
-  `npx -p env-status env-status --gen` will generate the json file for publishing.
+  `env-status --gen` will generate the json file for publishing.
 
 - **merge-validate**
 
   Validate whether a source branch can be merged into target branch.
 
+  `merge-validate <srouce-branch> <target-branch>`
+
 - **arc-diff**
 
   This command will do some consistance and confliction validation, then do arc diff.
 
+  `arc-diff <target-branch>`
+
 - **arc-land**
 
   This command will do some consistance and confliction validation, then do arc land.
+
+  `arc-land --onto <target-branch> --revision <revision>`
 
 ## API
 

@@ -4,7 +4,7 @@ import { EnvStatus } from '../index';
 import { Runner } from '../merge-validate';
 
 const argv = yargs.scriptName('merge-validate')
-  .usage('$0 sourceBranch targetBranch')
+  .usage('$0 <source-branch> <target-branch>')
   .help()
   .argv;
 
