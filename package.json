@@ -6,7 +6,7 @@
     "env",
     "status"
   ],
-  "homepage": "https://github.com/webyom/env-status",
+  "homepage": "https://github.com/juicecube/env-status",
   "author": {
     "name": "Gary Wang",
     "email": "webyom@gmail.com",
@@ -14,15 +14,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/webyom/env-status.git"
+    "url": "https://github.com/juicecube/env-status.git"
   },
   "bugs": {
-    "url": "https://github.com/webyom/env-status/issues"
+    "url": "https://github.com/juicecube/env-status/issues"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/webyom/env-status/blob/master/LICENSE-MIT"
+      "url": "https://github.com/juicecube/env-status/blob/master/LICENSE-MIT"
     }
   ],
   "engines": {

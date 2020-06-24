@@ -1,7 +1,7 @@
 # env-status
 
-[![CircleCI](https://circleci.com/gh/webyom/env-status.svg?style=svg)](https://circleci.com/gh/webyom/env-status)
-[![codecov](https://codecov.io/gh/webyom/env-status/branch/master/graph/badge.svg)](https://codecov.io/gh/webyom/env-status)
+[![CircleCI](https://circleci.com/gh/juicecube/env-status.svg?style=svg)](https://circleci.com/gh/juicecube/env-status)
+[![codecov](https://codecov.io/gh/juicecube/env-status/branch/master/graph/badge.svg)](https://codecov.io/gh/juicecube/env-status)
 
 This package includes below features:
 
@@ -11,7 +11,7 @@ This package includes below features:
 
 Recommended git flow as below:
 
-![npx -p env-status env-status staging](https://raw.githubusercontent.com/webyom/env-status/master/img/gitflow.png)
+![npx -p env-status env-status staging](https://raw.githubusercontent.com/juicecube/env-status/master/img/gitflow.png)
 
 ## Setup
 
@@ -25,7 +25,7 @@ Recommended git flow as below:
   module.exports = {
     envs: ['production', 'staging', 'dev', 'dev1', 'dev2', 'dev3'],
     url: function (env) {
-      return `https://raw.githubusercontent.com/webyom/env-status/master/envs/${env}.json`;
+      return `https://raw.githubusercontent.com/juicecube/env-status/master/envs/${env}.json`;
     },
     gen: 'dist/env-status.json'
   };
@@ -57,11 +57,11 @@ Recommended git flow as below:
 
   `env-status` will show all the env status
 
-  ![env-status](https://raw.githubusercontent.com/webyom/env-status/master/img/result-1.png)
+  ![env-status](https://raw.githubusercontent.com/juicecube/env-status/master/img/result-1.png)
 
   `env-status staging` will show staging and production (if defined) status
 
-  ![env-status staging](https://raw.githubusercontent.com/webyom/env-status/master/img/result-2.png)
+  ![env-status staging](https://raw.githubusercontent.com/juicecube/env-status/master/img/result-2.png)
 
   `env-status --init` will create `.envstatus.js` config file in your project root.
 
@@ -156,4 +156,4 @@ Recommended git flow as below:
 
 ## How to identify an env is available or using
 
-![npx -p env-status env-status staging](https://raw.githubusercontent.com/webyom/env-status/master/img/status-rule.png)
+![npx -p env-status env-status staging](https://raw.githubusercontent.com/juicecube/env-status/master/img/status-rule.png)
