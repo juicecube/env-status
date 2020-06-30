@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as path from 'path';
 import * as ora from 'ora';
 import mockConsole from 'jest-mock-console';
 import { EnvStatus } from '../index';
@@ -15,12 +14,16 @@ beforeEach(() => {
   envStatus = new EnvStatus();
   mockFetchOrigin(envStatus);
   spinner = ora();
-  runner = new Runner(envStatus, {
-    _: [],
-    $0: 'env-status',
-    init: false,
-    gen: false,
-  }, spinner);
+  runner = new Runner(
+    envStatus,
+    {
+      _: [],
+      $0: 'env-status',
+      init: false,
+      gen: false,
+    },
+    spinner,
+  );
 });
 
 afterAll(() => {
@@ -132,7 +135,7 @@ describe('run', () => {
       };
     });
     jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
-      const res: any = {envs: []};
+      const res: any = { envs: [] };
       return res;
     });
     const spinnerRestore = mockSpinner(spinner);
@@ -152,7 +155,7 @@ describe('run', () => {
       };
     });
     jest.spyOn(envStatus, 'getConfig').mockImplementationOnce(() => {
-      const res: any = {envs: ['staging', 'production']};
+      const res: any = { envs: ['staging', 'production'] };
       return res;
     });
     const spinnerRestore = mockSpinner(spinner);
@@ -173,15 +176,15 @@ describe('run', () => {
     });
     const spy = jest.spyOn(envStatus, 'fetchEnvData').mockImplementation((env: string) => {
       if (env === 'production') {
-        return Promise.resolve(mockEnvData({env, commit: env, date: 10}));
+        return Promise.resolve(mockEnvData({ env, commit: env, date: 10 }));
       } else if (env === 'staging') {
-        return Promise.resolve(mockEnvData({env, commit: env, date: 5}));
+        return Promise.resolve(mockEnvData({ env, commit: env, date: 5 }));
       } else if (env === 'dev') {
-        return Promise.resolve(mockEnvData({env, commit: env, date: 7}));
+        return Promise.resolve(mockEnvData({ env, commit: env, date: 7 }));
       } else if (env === 'dev1') {
-        return Promise.resolve(mockEnvData({env, commit: env, date: 7}));
+        return Promise.resolve(mockEnvData({ env, commit: env, date: 7 }));
       } else {
-        return Promise.resolve({env, err: FETCH_ERR.LOAD_ERROR, date: 7});
+        return Promise.resolve({ env, err: FETCH_ERR.LOAD_ERROR, date: 7 });
       }
     });
     const spy2 = jest.spyOn(envStatus, 'isAncestorCommit').mockImplementation((c1, c2) => {

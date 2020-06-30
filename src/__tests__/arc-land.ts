@@ -1,4 +1,4 @@
-import * as child_process from 'child_process';
+import * as childProcess from 'child_process';
 import mockConsole from 'jest-mock-console';
 import { EnvStatus } from '../index';
 import { Runner } from '../arc-land';
@@ -167,7 +167,7 @@ describe('run', () => {
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'sprint/xxx';
     });
-    const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation((branchName) => {
+    const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation(branchName => {
       if (branchName === 'sprint/xxx') {
         throw new Error('error');
       }
@@ -192,7 +192,7 @@ describe('run', () => {
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'sprint/xxx';
     });
-    const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation((branchName) => {
+    const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation(branchName => {
       if (branchName === 'origin/master') {
         throw new Error('error');
       }
@@ -273,7 +273,7 @@ describe('run', () => {
     jest.spyOn(envStatus, 'isAncestorCommit').mockImplementationOnce(() => {
       return true;
     });
-    jest.spyOn(child_process, 'spawnSync').mockImplementationOnce((...args) => {
+    jest.spyOn(childProcess, 'spawnSync').mockImplementationOnce((...args) => {
       expect(args[0]).toEqual('arc');
       expect(args[1]).toEqual(['land', '--onto', 'master']);
       return 0 as any;

@@ -1,4 +1,4 @@
-import * as child_process from 'child_process';
+import * as childProcess from 'child_process';
 import * as fetch from 'fetch';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -12,12 +12,12 @@ export class EnvStatus {
 
   private static instance: EnvStatus;
 
-  private envDataCache: {[key: string]: IEnvData} = {};
+  private envDataCache: { [key: string]: IEnvData } = {};
   private fetchOriginPromise: Promise<void>;
   private envConfig: IEnvConfig;
 
   public setConfig(config: IEnvConfig): IEnvConfig {
-    return this.envConfig = config;
+    return (this.envConfig = config);
   }
 
   public getConfig(): IEnvConfig | null {
@@ -39,8 +39,8 @@ export class EnvStatus {
     if (this.fetchOriginPromise) {
       return this.fetchOriginPromise;
     }
-    return this.fetchOriginPromise = new Promise((resolve: () => void, reject: (err: any) => void) => {
-      child_process.execFile('git', ['fetch', 'origin'], (err) => {
+    return (this.fetchOriginPromise = new Promise((resolve: () => void, reject: (err: any) => void) => {
+      childProcess.execFile('git', ['fetch', 'origin'], err => {
         if (err) {
           this.fetchOriginPromise = null;
           reject(err);
@@ -48,17 +48,21 @@ export class EnvStatus {
           resolve();
         }
       });
-    });
+    }));
   }
 
-  public getLastCommit(now: Date) {
+  public getLastCommit(now: Date): Record<string, string> {
     let jsonStr;
     try {
-      jsonStr = child_process.execFileSync('git', ['show', '--stat', '--format={"commit": "%h", "author": "%an", "branch": "%d"}|||'])
+      jsonStr = childProcess
+        .execFileSync('git', ['show', '--stat', '--format={"commit": "%h", "author": "%an", "branch": "%d"}|||'])
         .toString()
         .split('|||')[0];
     } catch (err) {
-      jsonStr = fs.readFileSync('last-commit.txt').toString().split('|||')[0];
+      jsonStr = fs
+        .readFileSync('last-commit.txt')
+        .toString()
+        .split('|||')[0];
     }
     const res = JSON.parse(jsonStr);
     res.date = now.getTime();
@@ -66,21 +70,28 @@ export class EnvStatus {
     return res;
   }
 
-  public getBranchLastCommitId(branchName: string) {
-    return child_process.execFileSync('git', ['rev-parse', '--short', branchName]).toString().trim();
+  public getBranchLastCommitId(branchName: string): string {
+    return childProcess
+      .execFileSync('git', ['rev-parse', '--short', branchName])
+      .toString()
+      .trim();
   }
 
-  public isAncestorCommit(c1: string, c2: string) {
+  public isAncestorCommit(c1: string, c2: string): boolean {
     try {
-      child_process.execFileSync('git', ['merge-base', '--is-ancestor', c1, c2]);
+      childProcess.execFileSync('git', ['merge-base', '--is-ancestor', c1, c2]);
       return true;
     } catch (err) {
       return false;
     }
   }
 
-  public getBranchName() {
-    const res = child_process.execFileSync('git', ['branch']).toString().split(os.EOL).find((x) => x.startsWith('*'));
+  public getBranchName(): string {
+    const res = childProcess
+      .execFileSync('git', ['branch'])
+      .toString()
+      .split(os.EOL)
+      .find(x => x.startsWith('*'));
     if (res) {
       return res.slice(1).trim();
     } else {
@@ -92,26 +103,30 @@ export class EnvStatus {
     if (branch === 'master') {
       return BRANCH_TYPES.MASTER;
     }
+
     if (branch.startsWith('sprint/')) {
       return BRANCH_TYPES.SPRINT;
     }
+
     if (branch.startsWith('feat/')) {
       return BRANCH_TYPES.SPRINT_FEATURE;
     }
+
     if (branch.startsWith('fix/')) {
       return BRANCH_TYPES.SPRINT_FIX;
     }
+
     if (branch.startsWith('hotfix/')) {
       return BRANCH_TYPES.HOTFIX;
     }
     return BRANCH_TYPES.OTHERS;
   }
 
-  public setEnvDataCache(env: string, data: IEnvData) {
+  public setEnvDataCache(env: string, data: IEnvData): void {
     this.envDataCache[env] = data;
   }
 
-  public appendCurrentTimestampToUrl(url: string, now: Date) {
+  public appendCurrentTimestampToUrl(url: string, now: Date): string {
     return `${url}${url.indexOf('?') > 0 ? '&' : '?'}t=${now.getTime()}`;
   }
 
@@ -123,23 +138,24 @@ export class EnvStatus {
       }
       const config = this.getConfig();
       if (!config) {
-        resolve({err: FETCH_ERR.CONFIG_UNDEFINED, env});
+        resolve({ err: FETCH_ERR.CONFIG_UNDEFINED, env });
         return;
       }
+
       if (typeof config.url !== 'function') {
-        resolve({err: FETCH_ERR.URL_FUNCTION_UNDEFINED, env});
+        resolve({ err: FETCH_ERR.URL_FUNCTION_UNDEFINED, env });
         return;
       }
       const url = config.url(env);
       fetch.fetchUrl(this.appendCurrentTimestampToUrl(url, new Date()), (error: any, meta: any, body: any) => {
         let data;
         if (error || meta.status !== 200) {
-          data = {err: FETCH_ERR.LOAD_ERROR, env};
+          data = { err: FETCH_ERR.LOAD_ERROR, env };
         } else {
           try {
-            data = Object.assign({env}, JSON.parse(body.toString()));
+            data = Object.assign({ env }, JSON.parse(body.toString()));
           } catch (err) {
-            data = {err: FETCH_ERR.PARSE_RESPONSE_ERROR, env};
+            data = { err: FETCH_ERR.PARSE_RESPONSE_ERROR, env };
           }
         }
         this.setEnvDataCache(env, data);
@@ -149,7 +165,7 @@ export class EnvStatus {
   }
 
   public isEnvAvailable(env: string): Promise<boolean> {
-    return Promise.all(['production', 'staging', env].map((e) => this.fetchEnvData(e))).then((envsData) => {
+    return Promise.all(['production', 'staging', env].map(e => this.fetchEnvData(e))).then(envsData => {
       const envData: any = envsData[2];
       const stgData: any = envsData[1];
       const prdData: any = envsData[0];

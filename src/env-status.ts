@@ -51,7 +51,7 @@ export class Runner {
     if (argv.gen) {
       const data = this.envStatus.getLastCommit(new Date());
 
-      const outputPath = path.resolve(config && config.gen || 'dist/env-status.json');
+      const outputPath = path.resolve((config && config.gen) || 'dist/env-status.json');
       mkdirp.sync(path.dirname(outputPath));
       fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
       console.log(Runner.MESSAGES.COMMIT_LOG_GENERATED);
@@ -75,50 +75,53 @@ export class Runner {
 
     spinner.text = Runner.MESSAGES.SPINNER_LOADING_ENV_DATA;
 
-    return Promise.all(envs.map((env) => this.envStatus.fetchEnvData(env))).then(async (envsData) => {
+    return Promise.all(envs.map(env => this.envStatus.fetchEnvData(env))).then(async envsData => {
       envsData = envsData.sort((a: IEnvData, b: IEnvData) => {
         return this.getEnvWeight(a.env) - this.getEnvWeight(b.env) + (a.date > b.date ? -1 : a.date < b.date ? 1 : 0);
       });
-      const envsData2 = await Promise.all(envsData.map(async (data) => {
-        let status;
-        if (isEnvErrDataType(data)) {
-          status = chalk.red(data.err);
-          return {
+      const envsData2 = await Promise.all(
+        envsData.map(async data => {
+          let status;
+          if (isEnvErrDataType(data)) {
+            status = chalk.red(data.err);
+            return {
+              env: data.env,
+              status,
+            };
+          }
+
+          if (data.env === 'production') {
+            status = '';
+          } else if (await this.envStatus.isEnvAvailable(data.env)) {
+            status = chalk.green('Available');
+          } else {
+            status = chalk.yellow('Using');
+          }
+          const res = {
             env: data.env,
             status,
+            branch: data.branch,
+            commit: data.commit,
+            author: data.author,
+            date: data.date && moment(data.date).format('MM/DD HH:mm:ss'),
+            since: data.date && moment(data.date).fromNow(),
           };
-        }
-        if (data.env === 'production') {
-          status = '';
-        } else if (await this.envStatus.isEnvAvailable(data.env)) {
-          status = chalk.green('Available');
-        } else {
-          status = chalk.yellow('Using');
-        }
-        const res = {
-          env: data.env,
-          status,
-          branch: data.branch,
-          commit: data.commit,
-          author: data.author,
-          date: data.date && moment(data.date).format('MM/DD HH:mm:ss'),
-          since: data.date && moment(data.date).fromNow(),
-        };
-        return res;
-      }));
+          return res;
+        }),
+      );
       spinner.stop();
       this.printTable(envsData2);
       return Promise.resolve('');
     });
   }
 
-  private printTable(envsData: any) {
+  private printTable(envsData: any): void {
     console.log('');
-    console.log(asTable.configure({delimiter: ' | '})(envsData));
+    console.log(asTable.configure({ delimiter: ' | ' })(envsData));
     console.log('');
   }
 
-  private getEnvWeight(env: string) {
+  private getEnvWeight(env: string): number {
     if (env === 'production') {
       return 10;
     } else if (env === 'staging') {
@@ -129,8 +132,6 @@ export class Runner {
   }
 
   private getEnvListForPrint(envs: string[], requestEnv?: string): string[] {
-    return (envs).filter((env) =>
-      requestEnv ? (env === requestEnv || env === 'production') : true,
-    );
+    return envs.filter(env => (requestEnv ? env === requestEnv || env === 'production' : true));
   }
 }

@@ -3,9 +3,9 @@ import * as yargs from 'yargs';
 import { EnvStatus } from '../index';
 import { Runner } from '../merge-validate';
 
-const argv = yargs.scriptName('merge-validate')
+const argv = yargs
+  .scriptName('merge-validate')
   .usage('$0 <source-branch> <target-branch>')
-  .help()
-  .argv;
+  .help().argv;
 
-new Runner(new EnvStatus(), argv).run().then((code) => process.exit(code));
+new Runner(new EnvStatus(), argv).run().then(code => process.exit(code));
