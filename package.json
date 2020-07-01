@@ -41,6 +41,11 @@
     "lint:fix": "eslint --ext ts src --fix",
     "test": "jest --clearCache && jest --detectOpenHandles"
   },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
   "dependencies": {
     "as-table": "^1.0.52",
     "chalk": "^2.4.2",
@@ -59,6 +64,8 @@
     "@typescript-eslint/eslint-plugin": "^2.5.0",
     "@typescript-eslint/parser": "^2.5.0",
     "codecov": "^3.5.0",
+    "commitizen": "^4.1.2",
+    "cz-conventional-changelog": "^3.2.0",
     "eslint": "^6.5.1",
     "eslint-config-prettier": "^6.7.0",
     "eslint-plugin-import": "^2.18.2",
