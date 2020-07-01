@@ -137,6 +137,16 @@ describe('getBranchLastCommitId', () => {
 });
 
 describe('isAncestorCommit', () => {
+  test('return false if c1 is empty', () => {
+    const res = envStatus.isAncestorCommit('', 'b');
+    expect(res).toEqual(false);
+  });
+
+  test('return false if c2 is empty', () => {
+    const res = envStatus.isAncestorCommit('a', '');
+    expect(res).toEqual(false);
+  });
+
   test('return true if exec git command success', () => {
     jest.spyOn(childProcess, 'execFileSync').mockImplementationOnce((...args) => {
       expect(args[0]).toEqual('git');

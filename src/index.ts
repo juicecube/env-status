@@ -78,6 +78,10 @@ export class EnvStatus {
   }
 
   public isAncestorCommit(c1: string, c2: string): boolean {
+    if (!c1 || !c2) {
+      return false;
+    }
+
     try {
       childProcess.execFileSync('git', ['merge-base', '--is-ancestor', c1, c2]);
       return true;
