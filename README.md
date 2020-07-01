@@ -2,6 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/juicecube/env-status.svg?style=svg)](https://circleci.com/gh/juicecube/env-status)
 [![codecov](https://codecov.io/gh/juicecube/env-status/branch/master/graph/badge.svg)](https://codecov.io/gh/juicecube/env-status)
+[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
 This package includes below features:
 
