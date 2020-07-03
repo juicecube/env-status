@@ -50,6 +50,7 @@ export class Runner {
 
     if (argv.gen) {
       const data = this.envStatus.getLastCommit(new Date());
+      data.project = path.basename(process.cwd());
 
       const outputPath = path.resolve((config && config.gen) || 'dist/env-status.json');
       mkdirp.sync(path.dirname(outputPath));
