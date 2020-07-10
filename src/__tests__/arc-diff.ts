@@ -244,10 +244,42 @@ describe('run', () => {
     });
   });
 
-  test('success', () => {
+  test('diff master success', () => {
     jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
       return {
         _: ['master'],
+        $0: 'arc-diff',
+      };
+    });
+    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
+      return ['master'];
+    });
+    jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
+      return 'sprint/xxx';
+    });
+    jest.spyOn(envStatus, 'isAncestorCommit').mockImplementationOnce(() => {
+      return true;
+    });
+    jest.spyOn(childProcess, 'spawnSync').mockImplementationOnce((...args) => {
+      expect(args[0]).toEqual('arc');
+      expect(args[1]).toEqual(['diff', 'master']);
+      return 0 as any;
+    });
+    const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation(() => {
+      return 'a';
+    });
+    const mockConsoleRestore = mockConsole();
+    return runner.run().then((code: number) => {
+      expect(code).toBe(0);
+      mockConsoleRestore();
+      spy.mockRestore();
+    });
+  });
+
+  test('diff origin/master success', () => {
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['origin/master'],
         $0: 'arc-diff',
       };
     });

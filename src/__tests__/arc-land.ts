@@ -256,12 +256,45 @@ describe('run', () => {
     });
   });
 
-  test('success', () => {
+  test('land onto master success', () => {
     jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
       return {
         _: [],
         $0: 'arc-land',
         onto: 'master',
+      };
+    });
+    jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {
+      return ['--onto', 'master'];
+    });
+    jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
+      return 'sprint/xxx';
+    });
+    jest.spyOn(envStatus, 'isAncestorCommit').mockImplementationOnce(() => {
+      return true;
+    });
+    jest.spyOn(childProcess, 'spawnSync').mockImplementationOnce((...args) => {
+      expect(args[0]).toEqual('arc');
+      expect(args[1]).toEqual(['land', '--onto', 'master']);
+      return 0 as any;
+    });
+    const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation(() => {
+      return 'a';
+    });
+    const mockConsoleRestore = mockConsole();
+    return runner.run().then((code: number) => {
+      expect(code).toBe(0);
+      mockConsoleRestore();
+      spy.mockRestore();
+    });
+  });
+
+  test('land onto origin/master success', () => {
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: [],
+        $0: 'arc-land',
+        onto: 'origin/master',
       };
     });
     jest.spyOn(envStatus, 'getArgs').mockImplementationOnce(() => {

@@ -70,6 +70,10 @@ export class EnvStatus {
     return res;
   }
 
+  public getOriginBranch(branchName: string): string {
+    return branchName.startsWith('origin/') ? branchName : 'origin/' + branchName;
+  }
+
   public getBranchLastCommitId(branchName: string): string {
     return childProcess
       .execFileSync('git', ['rev-parse', '--short', branchName])
@@ -104,6 +108,8 @@ export class EnvStatus {
   }
 
   public getBranchType(branch: string): BRANCH_TYPES {
+    branch = branch.replace(/^origin\//, '');
+
     if (branch === 'master') {
       return BRANCH_TYPES.MASTER;
     }

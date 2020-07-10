@@ -58,7 +58,7 @@ export class Runner {
         }
 
         try {
-          targetBranchCommit = this.envStatus.getBranchLastCommitId('origin/' + targetBranchName);
+          targetBranchCommit = this.envStatus.getBranchLastCommitId(this.envStatus.getOriginBranch(targetBranchName));
         } catch (err) {
           console.log(chalk.red(`Failed to get last commit of "${targetBranchName}".`));
           return 5;

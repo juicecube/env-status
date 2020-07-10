@@ -136,6 +136,18 @@ describe('getBranchLastCommitId', () => {
   });
 });
 
+describe('getOriginBranch', () => {
+  test('pass master return origin/master', () => {
+    const res = envStatus.getOriginBranch('master');
+    expect(res).toEqual('origin/master');
+  });
+
+  test('pass origin/master return origin/master', () => {
+    const res = envStatus.getOriginBranch('origin/master');
+    expect(res).toEqual('origin/master');
+  });
+});
+
 describe('isAncestorCommit', () => {
   test('return false if c1 is empty', () => {
     const res = envStatus.isAncestorCommit('', 'b');
@@ -300,6 +312,9 @@ describe('isEnvAvailable', () => {
         }),
       );
     });
+    jest.spyOn(envStatus, 'fetchOrigin').mockImplementationOnce(() => {
+      return Promise.resolve();
+    });
     return envStatus.isEnvAvailable('production').then(res => {
       expect(res).toBe(true);
       spy.mockRestore();
@@ -316,6 +331,9 @@ describe('isEnvAvailable', () => {
     });
     const spy2 = jest.spyOn(envStatus, 'isAncestorCommit').mockImplementation(() => {
       return true;
+    });
+    jest.spyOn(envStatus, 'fetchOrigin').mockImplementationOnce(() => {
+      return Promise.resolve();
     });
     return envStatus.isEnvAvailable('sprint/xxx').then(res => {
       expect(res).toBe(true);
@@ -334,6 +352,9 @@ describe('isEnvAvailable', () => {
     });
     const spy2 = jest.spyOn(envStatus, 'isAncestorCommit').mockImplementation(() => {
       return true;
+    });
+    jest.spyOn(envStatus, 'fetchOrigin').mockImplementationOnce(() => {
+      return Promise.resolve();
     });
     return envStatus.isEnvAvailable('sprint/xxx').then(res => {
       expect(res).toBe(true);
@@ -355,6 +376,9 @@ but is ancestor of staging commit', () => {
     const spy2 = jest.spyOn(envStatus, 'isAncestorCommit').mockImplementation((c1, c2) => {
       return c2 === 'staging';
     });
+    jest.spyOn(envStatus, 'fetchOrigin').mockImplementationOnce(() => {
+      return Promise.resolve();
+    });
     return envStatus.isEnvAvailable('sprint/xxx').then(res => {
       expect(res).toBe(true);
       spy2.mockRestore();
@@ -374,6 +398,9 @@ and is not ancestor of staging commit', () => {
     const spy2 = jest.spyOn(envStatus, 'isAncestorCommit').mockImplementation(() => {
       return false;
     });
+    jest.spyOn(envStatus, 'fetchOrigin').mockImplementationOnce(() => {
+      return Promise.resolve();
+    });
     return envStatus.isEnvAvailable('sprint/xxx').then(res => {
       expect(res).toBe(false);
       spy2.mockRestore();
@@ -391,6 +418,9 @@ and is not ancestor of staging commit', () => {
     });
     const spy2 = jest.spyOn(envStatus, 'isAncestorCommit').mockImplementation(() => {
       return false;
+    });
+    jest.spyOn(envStatus, 'fetchOrigin').mockImplementationOnce(() => {
+      return Promise.resolve();
     });
     return envStatus.isEnvAvailable('staging').then(res => {
       expect(res).toBe(false);
