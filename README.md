@@ -74,6 +74,12 @@ Recommended git flow as below:
 
   `merge-validate <srouce-branch> <target-branch>`
 
+- **env-build-validate**
+
+  Validate whether a branch can be built in current environment.
+
+  `env-build-validate`
+
 - **arc-diff**
 
   This command will do some consistance and confliction validation, then do arc diff.

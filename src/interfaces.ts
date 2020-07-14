@@ -14,6 +14,14 @@ export const enum BRANCH_TYPES {
   OTHERS = 'OTHERS',
 }
 
+export const enum ENV_TYPES {
+  PRODUCTION = 'PRODUCTION',
+  STAGING = 'STAGING',
+  TEST = 'TEST',
+  DEV = 'DEV',
+  OTHERS = 'OTHERS',
+}
+
 export interface IEnvData {
   env: string;
   branch: string;

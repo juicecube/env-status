@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as fetch from 'fetch';
 import { EnvStatus } from '../index';
-import { FETCH_ERR, BRANCH_TYPES, IEnvData, IEnvErrData } from '../interfaces';
+import { FETCH_ERR, BRANCH_TYPES, ENV_TYPES, IEnvData, IEnvErrData } from '../interfaces';
 import { mockEnvData } from './util';
 
 let envStatus: EnvStatus;
@@ -221,6 +221,40 @@ describe('getBranchType', () => {
 
   test('others is OTHERS', () => {
     expect(envStatus.getBranchType('others')).toEqual(BRANCH_TYPES.OTHERS);
+  });
+});
+
+describe('getEnvType', () => {
+  test('production is PRODUCTION', () => {
+    expect(envStatus.getEnvType('production')).toEqual(ENV_TYPES.PRODUCTION);
+  });
+
+  test('staging is STAGING', () => {
+    expect(envStatus.getEnvType('staging')).toEqual(ENV_TYPES.STAGING);
+  });
+
+  test('test is TEST', () => {
+    expect(envStatus.getEnvType('test')).toEqual(ENV_TYPES.TEST);
+  });
+
+  test('test01 is TEST', () => {
+    expect(envStatus.getEnvType('test01')).toEqual(ENV_TYPES.TEST);
+  });
+
+  test('dev is DEV', () => {
+    expect(envStatus.getEnvType('dev')).toEqual(ENV_TYPES.DEV);
+  });
+
+  test('dev01 is DEV', () => {
+    expect(envStatus.getEnvType('dev01')).toEqual(ENV_TYPES.DEV);
+  });
+
+  test('local is OTHERS', () => {
+    expect(envStatus.getEnvType('local')).toEqual(ENV_TYPES.OTHERS);
+  });
+
+  test('undefined is OTHERS', () => {
+    expect(envStatus.getEnvType()).toEqual(ENV_TYPES.OTHERS);
   });
 });
 

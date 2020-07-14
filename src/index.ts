@@ -3,7 +3,7 @@ import * as fetch from 'fetch';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { FETCH_ERR, BRANCH_TYPES, IEnvConfig, IEnvData, IEnvErrData } from './interfaces';
+import { FETCH_ERR, BRANCH_TYPES, ENV_TYPES, IEnvConfig, IEnvData, IEnvErrData } from './interfaces';
 
 export class EnvStatus {
   public static getShared(): EnvStatus {
@@ -112,24 +112,31 @@ export class EnvStatus {
 
     if (branch === 'master') {
       return BRANCH_TYPES.MASTER;
-    }
-
-    if (branch.startsWith('sprint/')) {
+    } else if (branch.startsWith('sprint/')) {
       return BRANCH_TYPES.SPRINT;
-    }
-
-    if (branch.startsWith('feat/')) {
+    } else if (branch.startsWith('feat/')) {
       return BRANCH_TYPES.SPRINT_FEATURE;
-    }
-
-    if (branch.startsWith('fix/')) {
+    } else if (branch.startsWith('fix/')) {
       return BRANCH_TYPES.SPRINT_FIX;
-    }
-
-    if (branch.startsWith('hotfix/')) {
+    } else if (branch.startsWith('hotfix/')) {
       return BRANCH_TYPES.HOTFIX;
+    } else {
+      return BRANCH_TYPES.OTHERS;
     }
-    return BRANCH_TYPES.OTHERS;
+  }
+
+  public getEnvType(env = ''): ENV_TYPES {
+    if (env === 'production') {
+      return ENV_TYPES.PRODUCTION;
+    } else if (env === 'staging') {
+      return ENV_TYPES.STAGING;
+    } else if (env.startsWith('test')) {
+      return ENV_TYPES.TEST;
+    } else if (env.startsWith('dev')) {
+      return ENV_TYPES.DEV;
+    } else {
+      return ENV_TYPES.OTHERS;
+    }
   }
 
   public setEnvDataCache(env: string, data: IEnvData): void {
