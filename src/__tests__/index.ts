@@ -237,16 +237,8 @@ describe('getEnvType', () => {
     expect(envStatus.getEnvType('test')).toEqual(ENV_TYPES.TEST);
   });
 
-  test('test01 is TEST', () => {
-    expect(envStatus.getEnvType('test01')).toEqual(ENV_TYPES.TEST);
-  });
-
-  test('dev is DEV', () => {
-    expect(envStatus.getEnvType('dev')).toEqual(ENV_TYPES.DEV);
-  });
-
-  test('dev01 is DEV', () => {
-    expect(envStatus.getEnvType('dev01')).toEqual(ENV_TYPES.DEV);
+  test('development is DEV', () => {
+    expect(envStatus.getEnvType('development')).toEqual(ENV_TYPES.DEV);
   });
 
   test('local is OTHERS', () => {

@@ -8,7 +8,7 @@ export class Runner {
     const branchName = this.envStatus.getBranchName();
     const branchType = this.envStatus.getBranchType(branchName);
     const envType = this.envStatus.getEnvType(process.env.NODE_ENV);
-    console.log(`Build ${branchName} in ${process.env.NODE_ENV} environment.`);
+    console.log(`Build ${branchName} branch in ${process.env.NODE_ENV} environment.`);
     if (
       (envType === ENV_TYPES.PRODUCTION || envType === ENV_TYPES.STAGING || envType === ENV_TYPES.TEST) &&
       !(branchType === BRANCH_TYPES.MASTER || branchType === BRANCH_TYPES.SPRINT || branchType === BRANCH_TYPES.HOTFIX)

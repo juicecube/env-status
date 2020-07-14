@@ -130,9 +130,9 @@ export class EnvStatus {
       return ENV_TYPES.PRODUCTION;
     } else if (env === 'staging') {
       return ENV_TYPES.STAGING;
-    } else if (env.startsWith('test')) {
+    } else if (env === 'test') {
       return ENV_TYPES.TEST;
-    } else if (env.startsWith('dev')) {
+    } else if (env === 'development') {
       return ENV_TYPES.DEV;
     } else {
       return ENV_TYPES.OTHERS;
