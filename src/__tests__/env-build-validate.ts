@@ -17,6 +17,18 @@ afterAll(() => {
 });
 
 describe('run', () => {
+  test('invalid branch name xxx', () => {
+    jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
+      return 'xxx';
+    });
+    jest.spyOn(envStatus, 'getEnvType').mockImplementationOnce(() => {
+      return ENV_TYPES.DEV;
+    });
+    const mockConsoleRestore = mockConsole();
+    expect(runner.run()).toBe(1);
+    mockConsoleRestore();
+  });
+
   test('build feat branch in production env should fail', () => {
     jest.spyOn(envStatus, 'getBranchName').mockImplementationOnce(() => {
       return 'feat/xxx';
@@ -25,7 +37,7 @@ describe('run', () => {
       return ENV_TYPES.PRODUCTION;
     });
     const mockConsoleRestore = mockConsole();
-    expect(runner.run()).toBe(1);
+    expect(runner.run()).toBe(2);
     mockConsoleRestore();
   });
 
@@ -37,7 +49,7 @@ describe('run', () => {
       return ENV_TYPES.PRODUCTION;
     });
     const mockConsoleRestore = mockConsole();
-    expect(runner.run()).toBe(1);
+    expect(runner.run()).toBe(2);
     mockConsoleRestore();
   });
 
@@ -85,7 +97,7 @@ describe('run', () => {
       return ENV_TYPES.STAGING;
     });
     const mockConsoleRestore = mockConsole();
-    expect(runner.run()).toBe(1);
+    expect(runner.run()).toBe(2);
     mockConsoleRestore();
   });
 
@@ -97,7 +109,7 @@ describe('run', () => {
       return ENV_TYPES.STAGING;
     });
     const mockConsoleRestore = mockConsole();
-    expect(runner.run()).toBe(1);
+    expect(runner.run()).toBe(2);
     mockConsoleRestore();
   });
 
@@ -145,7 +157,7 @@ describe('run', () => {
       return ENV_TYPES.TEST;
     });
     const mockConsoleRestore = mockConsole();
-    expect(runner.run()).toBe(1);
+    expect(runner.run()).toBe(2);
     mockConsoleRestore();
   });
 
@@ -157,7 +169,7 @@ describe('run', () => {
       return ENV_TYPES.TEST;
     });
     const mockConsoleRestore = mockConsole();
-    expect(runner.run()).toBe(1);
+    expect(runner.run()).toBe(2);
     mockConsoleRestore();
   });
 
