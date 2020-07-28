@@ -1,6 +1,6 @@
 {
   "name": "env-status",
-  "version": "1.1.7",
+  "version": "1.2.0",
   "description": "A command to show each env status, whether it is using for testing or available for using.",
   "keywords": [
     "env",
@@ -40,7 +40,8 @@
     "build": "tsc",
     "lint": "eslint --ext ts src",
     "lint:fix": "eslint --ext ts src --fix",
-    "test": "jest --clearCache && jest --detectOpenHandles"
+    "test": "jest --clearCache && jest --detectOpenHandles",
+    "release": "standard-version"
   },
   "config": {
     "commitizen": {
@@ -76,6 +77,7 @@
     "jest-mock-process": "^1.2.0",
     "lint-staged": "^10.2.11",
     "prettier": "^1.19.1",
+    "standard-version": "^8.0.2",
     "ts-jest": "^24.0.2",
     "typescript": "^3.9.7"
   }
