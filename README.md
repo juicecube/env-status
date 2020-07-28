@@ -18,7 +18,7 @@ Recommended git flow as below:
 
 - Install
 
-  `yarn add --dev env-status`
+  `npm install --save-dev env-status`
 
 - Create `.envstatus.js` file in your project root as below.
 

@@ -1,6 +1,6 @@
 /.vscode/
 /lib/
-package-lock.json
+yarn.lock
 last-commit.txt
 
 ### Bower ###

@@ -16,3 +16,4 @@ last-commit.txt
 tsconfig.json
 tslint.json
 yarn.lock
+package-lock.json
