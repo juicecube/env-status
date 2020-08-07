@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/juicecube/env-status/compare/v1.2.6...v1.3.0) (2020-08-07)
+
+
+### Features
+
+* support optional cwd config for getBranchLastCommitId ([fcfcf45](https://github.com/juicecube/env-status/commit/fcfcf45f35f189949dbadff6f79dd195b8f4bd8a))
+
 ### [1.2.6](https://github.com/juicecube/env-status/compare/v1.2.5...v1.2.6) (2020-08-07)
 
 
