@@ -74,9 +74,9 @@ export class EnvStatus {
     return branchName.startsWith('origin/') ? branchName : 'origin/' + branchName;
   }
 
-  public getBranchLastCommitId(branchName: string): string {
+  public getBranchLastCommitId(branchName: string, cwd?: string): string {
     return childProcess
-      .execFileSync('git', ['rev-parse', '--short', branchName])
+      .execFileSync('git', ['rev-parse', '--short', branchName], { cwd: cwd })
       .toString()
       .trim();
   }
