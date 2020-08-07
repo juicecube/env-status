@@ -28,7 +28,7 @@
   "engines": {
     "node": ">= 8.1.2"
   },
-  "main": "index.js",
+  "main": "lib/index.js",
   "bin": {
     "arc-diff": "./lib/bin/arc-diff.js",
     "arc-land": "./lib/bin/arc-land.js",
