@@ -37,7 +37,7 @@
     "env-build-validate": "./lib/bin/env-build-validate.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -d",
     "lint": "eslint --ext ts src",
     "lint:fix": "eslint --ext ts src --fix",
     "test": "jest --clearCache && jest --detectOpenHandles",
