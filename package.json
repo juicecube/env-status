@@ -37,16 +37,12 @@
     "env-build-validate": "./lib/bin/env-build-validate.js"
   },
   "scripts": {
+    "commit": "git-cz",
     "build": "tsc -d",
     "lint": "eslint --ext ts src",
     "lint:fix": "eslint --ext ts src --fix",
     "test": "jest --clearCache && jest --detectOpenHandles",
     "release": "standard-version"
-  },
-  "config": {
-    "commitizen": {
-      "path": "cz-conventional-changelog"
-    }
   },
   "dependencies": {
     "as-table": "^1.0.52",
