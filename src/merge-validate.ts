@@ -42,9 +42,13 @@ export class Runner {
           return 2;
         }
 
-        if (branchType === BRANCH_TYPES.MASTER || branchType === BRANCH_TYPES.OTHERS) {
+        if (branchType === BRANCH_TYPES.OTHERS) {
           console.log(chalk.red(`Source branch name "${branchName}" is invalid.`));
           return 3;
+        }
+
+        if (branchType === BRANCH_TYPES.MASTER) {
+          return 0;
         }
 
         let branchCommit;

@@ -147,6 +147,24 @@ describe('run', () => {
     });
   });
 
+  test('master branch can be merged into any branch', () => {
+    jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
+      return {
+        _: ['master', 'xxx'],
+        $0: 'merge-validate',
+      };
+    });
+    const spy = jest.spyOn(envStatus, 'getBranchLastCommitId').mockImplementation(() => {
+      return 'a';
+    });
+    const mockConsoleRestore = mockConsole();
+    return runner.run().then((code: number) => {
+      expect(code).toBe(0);
+      mockConsoleRestore();
+      spy.mockRestore();
+    });
+  });
+
   test('catch error when get source branch last commit', () => {
     jest.spyOn(runner, 'getArgv').mockImplementationOnce(() => {
       return {
