@@ -120,6 +120,8 @@ export class EnvStatus {
       return BRANCH_TYPES.SPRINT_FIX;
     } else if (branch.startsWith('hotfix/')) {
       return BRANCH_TYPES.HOTFIX;
+    } else if (branch.startsWith('release/')) {
+      return BRANCH_TYPES.RELEASE;
     } else {
       return BRANCH_TYPES.OTHERS;
     }

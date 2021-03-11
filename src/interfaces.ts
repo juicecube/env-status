@@ -12,6 +12,7 @@ export const enum BRANCH_TYPES {
   HOTFIX = 'HOTFIX',
   MASTER = 'MASTER',
   OTHERS = 'OTHERS',
+  RELEASE = 'RELEASE',
 }
 
 export const enum ENV_TYPES {
