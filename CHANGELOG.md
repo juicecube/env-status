@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.3](https://github.com/juicecube/env-status/compare/v1.3.2...v1.3.3) (2021-03-11)
+
+
+### Bug Fixes
+
+* add release branch as master ([5ab35fd](https://github.com/juicecube/env-status/commit/5ab35fd1e2b88fea42bfae45481b77df7e3bf71e))
+* env-build-validate shell script ([8fe9e90](https://github.com/juicecube/env-status/commit/8fe9e90d169c87c7e5670ac0a0222eaece61e64b))
+
 ### [1.3.2](https://github.com/juicecube/env-status/compare/v1.3.1...v1.3.2) (2020-09-11)
 
 
