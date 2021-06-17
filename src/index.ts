@@ -90,6 +90,10 @@ export class EnvStatus {
       childProcess.execFileSync('git', ['merge-base', '--is-ancestor', c1, c2]);
       return true;
     } catch (err) {
+      // 当此环境对应的节点不存在的时候，默认此环境是可以使用的
+      if (err.status === 128) {
+        return true;
+      }
       return false;
     }
   }

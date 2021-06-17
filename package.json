@@ -30,8 +30,6 @@
   },
   "main": "lib/index.js",
   "bin": {
-    "arc-diff": "./lib/bin/arc-diff.js",
-    "arc-land": "./lib/bin/arc-land.js",
     "env-status": "./lib/bin/env-status.js",
     "merge-validate": "./lib/bin/merge-validate.js",
     "env-build-validate": "./lib/bin/env-build-validate.js"

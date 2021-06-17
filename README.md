@@ -78,19 +78,7 @@ Recommended git flow as below:
   Validate whether a branch can be built in current environment.
 
   `env-build-validate`
-
-- **arc-diff**
-
-  This command will do some consistance and confliction validation, then do arc diff.
-
-  `arc-diff <target-branch>`
-
-- **arc-land**
-
-  This command will do some consistance and confliction validation, then do arc land.
-
-  `arc-land --onto <target-branch> --revision <revision>`
-
+  
 ## API
 
 - **getLastCommit(now: Date): object**
