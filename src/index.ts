@@ -126,9 +126,9 @@ export class EnvStatus {
       return BRANCH_TYPES.HOTFIX;
     } else if (branch.startsWith('release/')) {
       return BRANCH_TYPES.RELEASE;
-    } else if (branch.startsWith('test/')) {
+    } else if (branch === 'test') {
       return BRANCH_TYPES.TEST;
-    } else if (branch.startsWith('staging/')) {
+    } else if (branch === 'staging') {
       return BRANCH_TYPES.RELEASE;
     } else {
       return BRANCH_TYPES.OTHERS;
