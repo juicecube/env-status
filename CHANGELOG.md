@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.5](https://github.com/juicecube/env-status/compare/v1.3.4...v1.3.5) (2021-07-05)
+
+
+### Bug Fixes
+
+* add regular branch reg ([b1054d0](https://github.com/juicecube/env-status/commit/b1054d05a7958e269bec2ff6c0b307a767900a29))
+
 ### [1.3.4](https://github.com/juicecube/env-status/compare/v1.3.3...v1.3.4) (2021-06-17)
 
 
