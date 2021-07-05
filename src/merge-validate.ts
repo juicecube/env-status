@@ -35,11 +35,15 @@ export class Runner {
           return 1;
         }
 
+        // 兼容dev,test,staging,master固定分支对应各个环境的情况，带来的问题是feature分支可以直接合并到master
         if (
           (branchType === BRANCH_TYPES.SPRINT_FEATURE || branchType === BRANCH_TYPES.SPRINT_FIX) &&
-          targetBranchType !== BRANCH_TYPES.SPRINT
+          targetBranchType !== BRANCH_TYPES.SPRINT &&
+          targetBranchType !== BRANCH_TYPES.TEST &&
+          targetBranchType !== BRANCH_TYPES.STAGING &&
+          targetBranchType !== BRANCH_TYPES.MASTER
         ) {
-          console.log(chalk.red('Feature and fix branch must be merged into sprint branch.'));
+          console.log(chalk.red('Feature and fix branch must be merged into sprint/test/staging/master branch.'));
           return 2;
         }
 

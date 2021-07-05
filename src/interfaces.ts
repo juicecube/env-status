@@ -13,6 +13,8 @@ export const enum BRANCH_TYPES {
   MASTER = 'MASTER',
   OTHERS = 'OTHERS',
   RELEASE = 'RELEASE',
+  TEST = 'TEST',
+  STAGING = 'STAGING',
 }
 
 export const enum ENV_TYPES {
