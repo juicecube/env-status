@@ -129,7 +129,7 @@ export class EnvStatus {
     } else if (branch === 'test') {
       return BRANCH_TYPES.TEST;
     } else if (branch === 'staging') {
-      return BRANCH_TYPES.RELEASE;
+      return BRANCH_TYPES.STAGING;
     } else {
       return BRANCH_TYPES.OTHERS;
     }
